@@ -10,8 +10,9 @@ Public website for Hyperpath AI. Plain HTML and CSS, with no build step.
 
 ## Publishing
 
-The site deploys to GitHub Pages through `.github/workflows/pages.yml` on every push to `main`.
-One-time setup: **Settings → Pages → Build and deployment → Source: GitHub Actions**.
+GitHub Pages publishes the site directly from the `main` branch (root folder) on every push.
+Setting: **Settings → Pages → Build and deployment → Source: Deploy from a branch → `main` / `(root)`**.
+The `.nojekyll` file tells GitHub to serve the files as they are, without a Jekyll build.
 
 ## Editing
 
