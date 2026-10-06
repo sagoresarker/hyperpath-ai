@@ -409,14 +409,10 @@ export default function Playground() {
 
   return (
     <figure className="monitor relative">
-      {/* corner registration marks */}
-      {["-left-1.5 -top-1.5 border-l border-t", "-right-1.5 -top-1.5 border-r border-t", "-left-1.5 -bottom-1.5 border-l border-b", "-right-1.5 -bottom-1.5 border-r border-b"].map((c) => (
-        <span key={c} aria-hidden className={`absolute h-3 w-3 border-indigo-500/70 ${c}`} />
-      ))}
-      <div className="border border-slate-300 bg-[var(--c-surface)] dark:border-slate-700">
+      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lift">
         {/* title bar */}
-        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 px-4 py-2 font-mono text-[11px] uppercase tracking-[0.12em] text-slate-500 dark:border-slate-800 dark:text-slate-400">
-          <span className="flex items-center gap-2 text-slate-800 dark:text-slate-200">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 px-4 py-2 font-mono text-[11px] uppercase tracking-[0.12em] text-slate-500">
+          <span className="flex items-center gap-2 text-slate-800">
             <span className={`h-1.5 w-1.5 rounded-full ${busy ? "bg-indigo-500 animate-pulse" : "bg-emerald-500"}`} aria-hidden />
             Interactive benchmark monitor
           </span>
@@ -424,10 +420,10 @@ export default function Playground() {
         </div>
 
         {/* query line */}
-        <div className="flex items-center gap-3 border-b border-slate-200 px-4 py-2 font-mono text-xs dark:border-slate-800">
-          <span className="text-indigo-600 dark:text-indigo-400">query&gt;</span>
+        <div className="flex items-center gap-3 border-b border-slate-200 px-4 py-2 font-mono text-xs">
+          <span className="text-indigo-600">query&gt;</span>
           <AnimatePresence mode="wait">
-            <m.span key={question} className="truncate text-slate-700 dark:text-slate-300" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
+            <m.span key={question} className="truncate text-slate-700" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
               {question}
             </m.span>
           </AnimatePresence>
@@ -441,33 +437,33 @@ export default function Playground() {
             role="img"
             aria-label="Interactive diagram. A query node connects through five reasoning steps to an answer node. A new query derives each step and stores it; a related query reuses the stored steps almost instantly. Click any node to perturb it."
           />
-          <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 flex justify-between px-1 font-mono text-[9px] text-slate-400 dark:text-slate-600">
+          <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 flex justify-between px-1 font-mono text-[9px] text-slate-400">
             {Array.from({ length: 11 }, (_, i) => <span key={i}>{(i / 10).toFixed(1)}</span>)}
           </div>
         </div>
 
         {/* telemetry */}
-        <div className="grid grid-cols-3 border-t border-slate-200 font-mono dark:border-slate-800">
+        <div className="grid grid-cols-3 border-t border-slate-200 font-mono">
           {[
-            ["derived", worked, "text-amber-600 dark:text-amber-400"],
-            ["reused", reused, "text-emerald-600 dark:text-emerald-400"],
-            ["in memory", saved, "text-indigo-600 dark:text-indigo-400"],
+            ["derived", worked, "text-amber-600"],
+            ["reused", reused, "text-emerald-600"],
+            ["in memory", saved, "text-indigo-600"],
           ].map(([label, v, tone], i) => (
-            <div key={label} className={`px-4 py-2.5 ${i ? "border-l border-slate-200 dark:border-slate-800" : ""}`}>
-              <div className="text-[10px] uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">{label}</div>
+            <div key={label} className={`px-4 py-2.5 ${i ? "border-l border-slate-200" : ""}`}>
+              <div className="text-[10px] uppercase tracking-[0.12em] text-slate-500">{label}</div>
               <div className={`text-xl tabular-nums ${tone}`}>{pad(v, 2)}</div>
             </div>
           ))}
         </div>
 
         {/* step trace */}
-        <div className="flex items-center gap-3 border-t border-slate-200 px-4 py-2.5 dark:border-slate-800">
-          <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">trace</span>
+        <div className="flex items-center gap-3 border-t border-slate-200 px-4 py-2.5">
+          <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-slate-500">trace</span>
           <div className="flex flex-1 gap-1" aria-hidden>
             {steps.map((s, i) => (
               <m.span
                 key={i + String(s)}
-                className={`h-1.5 flex-1 ${s === "worked" ? "bg-amber-500" : s === "reused" ? "bg-emerald-500" : "bg-slate-200 dark:bg-slate-800"}`}
+                className={`h-1.5 flex-1 ${s === "worked" ? "bg-amber-500" : s === "reused" ? "bg-emerald-500" : "bg-slate-200"}`}
                 initial={s ? { scaleX: 0 } : false}
                 animate={{ scaleX: 1 }}
                 style={{ originX: 0 }}
@@ -475,29 +471,29 @@ export default function Playground() {
               />
             ))}
           </div>
-          <span className="font-mono text-[10px] text-slate-500 tabular-nums dark:text-slate-400" aria-live="polite">{worked}d / {reused}r</span>
+          <span className="font-mono text-[10px] text-slate-500 tabular-nums" aria-live="polite">{worked}d / {reused}r</span>
         </div>
 
         {/* controls */}
-        <div className="flex flex-wrap gap-2 border-t border-slate-200 px-4 py-3 dark:border-slate-800">
-          <ToolButton primary onClick={take(fresh)} disabled={busy}>Run new query</ToolButton>
-          <ToolButton onClick={take(similar)} disabled={busy || saved === 0}>Run related query</ToolButton>
-          <ToolButton onClick={take(clear)} disabled={busy}>Clear memory</ToolButton>
+        <div className="flex flex-wrap gap-2 border-t border-slate-200 px-4 py-3">
+          <ToolButton size="sm" primary onClick={take(fresh)} disabled={busy}>Run new query</ToolButton>
+          <ToolButton size="sm" onClick={take(similar)} disabled={busy || saved === 0}>Run related query</ToolButton>
+          <ToolButton size="sm" onClick={take(clear)} disabled={busy}>Clear memory</ToolButton>
         </div>
 
         {/* console */}
-        <div className="flex items-center gap-2 border-t border-slate-200 bg-slate-50 px-4 py-2 font-mono text-[11px] text-slate-600 dark:border-slate-800 dark:bg-slate-900/60 dark:text-slate-400">
-          <span className="text-slate-400 dark:text-slate-600">$</span>
+        <div className="flex items-center gap-2 border-t border-slate-200 bg-slate-50/70 px-4 py-2 font-mono text-[11px] text-slate-600">
+          <span className="text-slate-400">$</span>
           <AnimatePresence mode="wait">
             <m.span key={log.key} className="truncate" initial={{ opacity: 0, y: 3 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.18 }}>
               {log.text}
             </m.span>
           </AnimatePresence>
-          <span className="ml-0.5 inline-block h-3 w-1.5 animate-pulse bg-slate-400 dark:bg-slate-500" aria-hidden />
+          <span className="ml-0.5 inline-block h-3 w-1.5 animate-pulse bg-slate-400" aria-hidden />
         </div>
       </div>
-      <figcaption className="mt-3 font-mono text-[11px] text-slate-500 dark:text-slate-400">
-        <span className="text-slate-800 dark:text-slate-200">Fig. 1.</span> Illustrative simulation: step counts are for demonstration, not measured results. Click nodes to perturb them.
+      <figcaption className="mt-3 font-mono text-[11px] text-slate-500">
+        <span className="text-slate-800">Fig. 1.</span> Illustrative simulation: step counts are for demonstration, not measured results. Click nodes to perturb them.
       </figcaption>
     </figure>
   );

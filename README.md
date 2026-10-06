@@ -1,6 +1,6 @@
 # Hyperpath AI website
 
-Public website for Hyperpath AI: a static, client-side-only site styled as a research lab / technical paper (graph-paper grid, hairline borders, serif headings with monospace accents, light and dark themes).
+Public website for Hyperpath AI: a static, client-side-only site styled as a light, editorial research platform (warm off-white paper, hairline slate borders, Geist sans with Instrument Serif italic accents, white elevated cards).
 
 - **Stack:** React 18, Tailwind CSS 3 and Framer Motion, built with Vite. All animation runs in the browser (Framer Motion springs, HTML5 Canvas and SVG). There is no server code.
 - **Pages:** Vision (home, with the interactive reasoning playground), About, Contact and 404.
@@ -13,7 +13,7 @@ Public website for Hyperpath AI: a static, client-side-only site styled as a res
 | `web/` | Source code (edit here) |
 | `web/src/components/Playground.jsx` | Interactive benchmark monitor: canvas engine (nodes, spring physics, pulses) plus telemetry and controls |
 | `web/src/components/ui.jsx` | Tool buttons, status tags, section headers, reveal and count-up helpers |
-| `web/src/styles.css` | Theme tokens (`--c-*`, also read by the canvas) and the graph-paper background |
+| `web/src/styles.css` | Theme tokens (`--c-*`, also read by the canvas) and base typography |
 | `index.html`, `about.html`, `contact.html`, `404.html`, `assets/` | **Built output** served by GitHub Pages. Do not edit by hand |
 
 ## Develop and publish

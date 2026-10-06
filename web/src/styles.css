@@ -2,79 +2,48 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Theme tokens. The canvas engine reads the --c-* values. */
+/* Light-only theme tokens. The canvas engine reads the --c-* values, so these
+   control how nodes and lines render on the white monitor card. */
 :root {
-  --c-page: #F6F7F3;
-  --c-surface: #FCFCFA;
-  --c-ink: #0F172A;
-  --c-muted: #64748B;
-  --c-faint: #CBD5E1;
-  --c-grid: #E2E8F0;
-  --c-q: #4F46E5;
+  --c-page: #FBFBFA;
+  --c-surface: #FFFFFF;
+  --c-ink: #1E1B4B;      /* deep indigo: outlines of question/answer nodes */
+  --c-muted: #334155;    /* slate-700: idle step outlines and canvas labels */
+  --c-faint: #94A3B8;    /* background nodes */
+  --c-grid: #E2E8F0;     /* faint background links */
+  --c-q: #3730A3;
   --c-a: #0F172A;
   --c-fact: #B45309;
-  --c-reuse: #059669;
-  --c-step-0: #4338CA;
-  --c-step-1: #6366F1;
-  --c-step-2: #0284C7;
-  --c-step-3: #0D9488;
-  --c-step-4: #7C3AED;
-  --grid-minor: rgba(15, 23, 42, 0.045);
-  --grid-major: rgba(15, 23, 42, 0.08);
+  --c-reuse: #047857;
+  --c-step-0: #3730A3;
+  --c-step-1: #4F46E5;
+  --c-step-2: #0369A1;
+  --c-step-3: #0F766E;
+  --c-step-4: #6D28D9;
   color-scheme: light;
-}
-@media (prefers-color-scheme: dark) {
-  :root {
-    --c-page: #0B0E14;
-    --c-surface: #10141B;
-    --c-ink: #E2E8F0;
-    --c-muted: #94A3B8;
-    --c-faint: #334155;
-    --c-grid: #1E293B;
-    --c-q: #818CF8;
-    --c-a: #E2E8F0;
-    --c-fact: #F59E0B;
-    --c-reuse: #34D399;
-    --c-step-0: #818CF8;
-    --c-step-1: #A5B4FC;
-    --c-step-2: #38BDF8;
-    --c-step-3: #2DD4BF;
-    --c-step-4: #C4B5FD;
-    --grid-minor: rgba(226, 232, 240, 0.035);
-    --grid-major: rgba(226, 232, 240, 0.07);
-    color-scheme: dark;
-  }
 }
 
 @layer base {
   html { scroll-behavior: smooth; }
   body {
-    @apply font-sans text-slate-900 antialiased dark:text-slate-100;
-    background-color: var(--c-page);
-    /* engineering graph paper: minor 24px, major 120px */
-    background-image:
-      linear-gradient(var(--grid-major) 1px, transparent 1px),
-      linear-gradient(90deg, var(--grid-major) 1px, transparent 1px),
-      linear-gradient(var(--grid-minor) 1px, transparent 1px),
-      linear-gradient(90deg, var(--grid-minor) 1px, transparent 1px);
-    background-size: 120px 120px, 120px 120px, 24px 24px, 24px 24px;
-    background-position: -1px -1px;
+    @apply bg-paper font-sans text-slate-600 antialiased;
+    font-feature-settings: "ss01", "cv11";
   }
-  h1, h2, h3 { @apply font-serif font-medium tracking-tight; text-wrap: balance; }
-  ::selection { background: #C7D2FE; color: #0F172A; }
-  a:focus-visible, button:focus-visible { outline: 1px solid #6366F1; outline-offset: 3px; }
+  h1, h2, h3 { @apply font-sans font-semibold tracking-tight text-slate-900; text-wrap: balance; }
+  /* Serif italic accents for emphasised words inside headings. */
+  h1 em, h2 em, h3 em, .accent { @apply font-serif font-normal italic tracking-normal text-indigo-700; }
+  ::selection { background: #E0E7FF; color: #0F172A; }
+  a:focus-visible, button:focus-visible { outline: 2px solid #6366F1; outline-offset: 2px; border-radius: 6px; }
 }
 
 @layer components {
-  .label { @apply font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400; }
-  .hairline { @apply border-slate-200 dark:border-slate-800; }
-  .panel { @apply border border-slate-200 bg-[var(--c-surface)] dark:border-slate-800; }
-  .tool-btn:not(:disabled):hover { box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.25), 0 0 22px -4px rgba(99, 102, 241, 0.45); }
-  .cite { @apply font-mono text-[0.7em] align-super text-indigo-600 dark:text-indigo-400 no-underline; }
+  .label { @apply font-mono text-[11px] font-medium uppercase tracking-[0.12em] text-slate-500; }
+  .panel { @apply rounded-xl border border-slate-200 bg-white shadow-card; }
+  .cite { @apply font-mono text-[0.55em] align-super text-indigo-600 no-underline; }
 }
+
+.topbar { background: color-mix(in srgb, #FBFBFA 88%, transparent); }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
 }
-
-.topbar { background: color-mix(in srgb, var(--c-page) 86%, transparent); }
