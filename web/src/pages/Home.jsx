@@ -32,16 +32,23 @@ function Ledger({ rows }) {
     <div className="mt-9 max-w-xl">
       <div className="flex items-baseline justify-between border-b border-slate-900 pb-2">
         <span className="font-mono text-[11px] font-medium uppercase tracking-[0.12em] text-slate-900">Cost ledger</span>
-        <span className="font-mono text-[11px] text-slate-500">live · from the monitor<span className="hidden lg:inline"> →</span><span className="lg:hidden"> ↓</span></span>
+        <span className="font-mono text-[11px] text-slate-500 whitespace-nowrap">live · from the monitor<span className="hidden lg:inline"> →</span><span className="lg:hidden"> ↓</span></span>
       </div>
-      <table className="w-full font-mono text-[12px] tabular-nums">
+      <table className="w-full table-fixed font-mono text-[12px] tabular-nums">
+        <colgroup>
+          <col className="w-7" />
+          <col />
+          <col className="w-11 sm:w-16" />
+          <col className="w-11 sm:w-16" />
+          <col className="w-12 sm:w-[6.5rem]" />
+        </colgroup>
         <thead>
           <tr className="text-left text-[10.5px] uppercase tracking-[0.1em] text-slate-400">
             <th className="py-2 font-medium">#</th>
             <th className="py-2 font-medium">Query</th>
             <th className="py-2 pl-3 text-right font-medium"><span className="sm:hidden">Der.</span><span className="hidden sm:inline">Derived</span></th>
             <th className="py-2 pl-3 text-right font-medium"><span className="sm:hidden">Reu.</span><span className="hidden sm:inline">Reused</span></th>
-            <th className="py-2 pl-4 font-medium sm:w-[6.5rem]">Cost</th>
+            <th className="py-2 pl-3 text-right font-medium sm:pl-4 sm:text-left">Cost</th>
           </tr>
         </thead>
         <tbody>
@@ -55,15 +62,15 @@ function Ledger({ rows }) {
                 animate={{ opacity: 1, backgroundColor: "rgba(224,231,255,0)" }}
                 transition={{ duration: 1.2 }}>
                 <td className="py-2 pr-2 text-slate-400">{String(r.id).padStart(2, "0")}</td>
-                <td className="max-w-[11rem] truncate py-2 pr-2">{r.q}</td>
+                <td className="truncate py-2 pr-2">{r.q}</td>
                 <td className="py-2 text-right text-amber-700">{r.derived}</td>
                 <td className="py-2 text-right text-emerald-700">{r.reused}</td>
-                <td className="py-2 pl-4">
-                  <div className="flex items-center gap-2">
+                <td className="py-2 pl-3 sm:pl-4">
+                  <div className="flex items-center justify-end gap-2 sm:justify-start">
                     <span className="hidden h-1.5 flex-1 bg-slate-100 sm:block">
                       <m.span className="block h-full bg-slate-900" initial={{ width: 0 }} animate={{ width: `${(r.derived / 5) * 100}%` }} transition={{ duration: 0.8, ease }} />
                     </span>
-                    <span className="w-8 text-right">{(r.derived / 5).toFixed(2)}</span>
+                    <span className="text-right sm:w-8">{(r.derived / 5).toFixed(2)}</span>
                   </div>
                 </td>
               </m.tr>
@@ -88,7 +95,7 @@ function Hero() {
   const onClear = useCallback(() => { setRows([]); nextId.current = 1; }, []);
 
   return (
-    <section className="pb-20 pt-10 lg:pt-14">
+    <section className="pb-14 pt-8 md:pb-20 md:pt-10 lg:pt-14">
       {/* journal masthead */}
       <m.div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-t-[3px] border-slate-900 pt-3"
         initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6 }}>
@@ -97,8 +104,8 @@ function Hero() {
         <span className="ml-auto font-mono text-[11px] uppercase tracking-[0.12em] text-slate-500">Hyperpath AI · October 2026</span>
       </m.div>
 
-      <div className="mt-10 grid items-start gap-12 lg:grid-cols-12 lg:gap-10">
-        <div className="lg:col-span-6">
+      <div className="mt-8 grid items-start gap-10 md:mt-10 lg:grid-cols-12 lg:gap-10">
+        <div className="min-w-0 lg:col-span-6">
           <m.h1
             className="text-[clamp(2.6rem,5.6vw,4.75rem)] leading-[1.03] tracking-[-0.04em]"
             initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease, delay: 0.05 }}
@@ -132,7 +139,7 @@ function Hero() {
           </m.div>
         </div>
 
-        <m.div className="lg:col-span-6 lg:pt-2" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.9, ease, delay: 0.2 }}>
+        <m.div className="min-w-0 lg:col-span-6 lg:pt-2" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.9, ease, delay: 0.2 }}>
           <Playground onRun={onRun} onClear={onClear} />
         </m.div>
       </div>
@@ -152,7 +159,7 @@ function Hero() {
 
 function Problem() {
   return (
-    <section className="grid gap-10 py-16 lg:grid-cols-12">
+    <section className="grid gap-8 py-12 md:gap-10 md:py-16 lg:grid-cols-12">
       <SectionHead no="1" label="Problem" className="lg:col-span-12" />
       <Reveal className="lg:col-span-6">
         <h2 className="text-3xl leading-[1.12] md:text-[2.6rem]">AI pays for the same thinking again and again.</h2>
@@ -188,12 +195,12 @@ function Method() {
     { no: "03", name: "Reuse", text: "When a related question arrives, stored steps are supplied instead of recomputed. Less computation, faster answers." },
   ];
   return (
-    <section id="method" className="scroll-mt-28 py-16">
+    <section id="method" className="scroll-mt-28 py-12 md:py-16">
       <SectionHead no="2" label="Method overview" title="Work it out once. Check it. Use it again." />
-      <Reveal delay={0.05} className="mt-10">
+      <Reveal delay={0.05} className="mt-8 md:mt-10">
         <div className="panel">
           {/* pipeline schematic */}
-          <svg viewBox="0 0 900 120" className="block w-full border-b border-slate-200 text-slate-400" role="img" aria-label="Pipeline: derive, then verify, then reuse, with reuse feeding later queries.">
+          <svg viewBox="0 0 900 120" className="hidden w-full border-b border-slate-200 text-slate-400 md:block" role="img" aria-label="Pipeline: derive, then verify, then reuse, with reuse feeding later queries.">
             <defs>
               <marker id="arr" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" orient="auto">
                 <path d="M0 0 L8 4 L0 8 Z" fill="currentColor" />
@@ -212,6 +219,11 @@ function Method() {
             <m.path d="M750 80 V102 H150 V84" stroke="#6366F1" strokeWidth="1" strokeDasharray="4 4" fill="none" markerEnd="url(#arr)" initial={{ pathLength: 0 }} whileInView={{ pathLength: 1 }} viewport={{ once: true }} transition={{ duration: 1.2, delay: 1 }} style={{ color: "#6366F1" }} />
             <text x="450" y="116" textAnchor="middle" fill="#6366F1" style={{ font: '500 10px "IBM Plex Mono", monospace', letterSpacing: "0.14em" }}>STORED STEPS FEED LATER QUERIES</text>
           </svg>
+          <p className="flex flex-wrap items-center gap-x-2 gap-y-1 border-b border-slate-200 px-5 py-3 font-mono text-[11px] uppercase tracking-[0.1em] text-slate-500 md:hidden">
+            <span className="text-slate-900">01 Derive</span><span aria-hidden>→</span>
+            <span className="text-slate-900">02 Verify</span><span aria-hidden>→</span>
+            <span className="text-slate-900">03 Reuse</span><span className="text-indigo-600" aria-hidden>↺</span>
+          </p>
           <div className="grid md:grid-cols-3">
             {stages.map((s, i) => (
               <div key={s.no} className={`p-6 ${i ? "border-t border-slate-200 md:border-l md:border-t-0" : ""}`}>
@@ -227,15 +239,42 @@ function Method() {
   );
 }
 
-function Vision() {
-  // Illustrative series: relative cost per answer over successive queries.
-  const reuse = [1, 0.8, 0.64, 0.52, 0.43, 0.37, 0.33, 0.3];
-  const W = 560, H = 240, L = 44, B = 28, T = 16, R = 12;
+const REUSE_SERIES = [1, 0.8, 0.64, 0.52, 0.43, 0.37, 0.33, 0.3];
+
+/** Illustrative cost chart. `compact` uses phone-sized geometry so text stays readable. */
+function CostChart({ compact = false }) {
+  const reuse = REUSE_SERIES;
+  const W = compact ? 330 : 560, H = compact ? 230 : 240, L = compact ? 36 : 44, B = 28, T = compact ? 22 : 16, R = 10;
+  const fs = compact ? 11 : 10;
   const x = (i) => L + (i / (reuse.length - 1)) * (W - L - R);
   const y = (v) => T + (1 - v / 1.1) * (H - T - B);
   const path = reuse.map((v, i) => `${i ? "L" : "M"}${x(i).toFixed(1)} ${y(v).toFixed(1)}`).join(" ");
+  const mono = (weight = 400) => ({ font: `${weight} ${fs}px "Geist Mono", monospace` });
   return (
-    <section className="grid gap-10 py-16 lg:grid-cols-12">
+    <svg viewBox={`0 0 ${W} ${H}`} className="block w-full" role="img" aria-label="Illustrative chart. Cost per answer stays flat without reuse and falls with reuse.">
+      {(compact ? [0, 0.5, 1] : [0, 0.25, 0.5, 0.75, 1]).map((v) => (
+        <g key={v}>
+          <line x1={L} x2={W - R} y1={y(v)} y2={y(v)} className="stroke-slate-200" strokeWidth="1" />
+          <text x={L - 6} y={y(v) + 4} textAnchor="end" className="fill-slate-500" style={mono()}>{v.toFixed(compact ? 1 : 2)}</text>
+        </g>
+      ))}
+      {reuse.map((_, i) => (compact && i % 2 ? null : (
+        <text key={i} x={x(i)} y={H - 8} textAnchor="middle" className="fill-slate-500" style={mono()}>{`q${i + 1}`}</text>
+      )))}
+      <line x1={L} x2={W - R} y1={y(1)} y2={y(1)} stroke="#64748B" strokeWidth="1.5" strokeDasharray="5 4" />
+      <m.path d={path} fill="none" stroke="#4F46E5" strokeWidth="2" initial={{ pathLength: 0 }} whileInView={{ pathLength: 1 }} viewport={{ once: true }} transition={{ duration: 1.6, ease }} />
+      {reuse.map((v, i) => (
+        <m.circle key={i} cx={x(i)} cy={y(v)} r="3.5" fill="#4F46E5" initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: 0.2 + i * 0.18 }} />
+      ))}
+      <text x={W - R} y={y(1) - 8} textAnchor="end" fill="#64748B" style={{ ...mono(500), letterSpacing: "0.08em" }}>WITHOUT REUSE</text>
+      <text x={x(7)} y={y(0.3) - 12} textAnchor="end" fill="#4F46E5" style={{ ...mono(500), letterSpacing: "0.08em" }}>WITH REUSE</text>
+    </svg>
+  );
+}
+
+function Vision() {
+  return (
+    <section className="grid gap-8 py-12 md:gap-10 md:py-16 lg:grid-cols-12">
       <SectionHead no="3" label="Vision" className="lg:col-span-12" />
       <Reveal className="lg:col-span-5">
         <h2 className="text-3xl leading-[1.12] md:text-[2.6rem]">Reasoning should be an asset, not a recurring bill.</h2>
@@ -244,26 +283,10 @@ function Vision() {
           once should make the next problem faster and cheaper to solve.
         </p>
       </Reveal>
-      <Reveal delay={0.1} className="lg:col-span-6 lg:col-start-7">
-        <figure className="panel p-5">
-          <svg viewBox={`0 0 ${W} ${H}`} className="block w-full" role="img" aria-label="Illustrative chart. Cost per answer stays flat without reuse and falls with reuse.">
-            {[0, 0.25, 0.5, 0.75, 1].map((v) => (
-              <g key={v}>
-                <line x1={L} x2={W - R} y1={y(v)} y2={y(v)} className="stroke-slate-200" strokeWidth="1" />
-                <text x={L - 8} y={y(v) + 3} textAnchor="end" className="fill-slate-500" style={{ font: '400 10px "IBM Plex Mono", monospace' }}>{v.toFixed(2)}</text>
-              </g>
-            ))}
-            {reuse.map((_, i) => (
-              <text key={i} x={x(i)} y={H - 10} textAnchor="middle" className="fill-slate-500" style={{ font: '400 10px "IBM Plex Mono", monospace' }}>{`q${i + 1}`}</text>
-            ))}
-            <line x1={L} x2={W - R} y1={y(1)} y2={y(1)} stroke="#64748B" strokeWidth="1.5" strokeDasharray="5 4" />
-            <m.path d={path} fill="none" stroke="#6366F1" strokeWidth="2" initial={{ pathLength: 0 }} whileInView={{ pathLength: 1 }} viewport={{ once: true }} transition={{ duration: 1.6, ease }} />
-            {reuse.map((v, i) => (
-              <m.circle key={i} cx={x(i)} cy={y(v)} r="3.5" fill="#6366F1" initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: 0.2 + i * 0.18 }} />
-            ))}
-            <text x={W - R} y={y(1) - 8} textAnchor="end" fill="#64748B" style={{ font: '500 10px "IBM Plex Mono", monospace', letterSpacing: "0.1em" }}>WITHOUT REUSE</text>
-            <text x={x(7)} y={y(0.3) - 12} textAnchor="end" fill="#6366F1" style={{ font: '500 10px "IBM Plex Mono", monospace', letterSpacing: "0.1em" }}>WITH REUSE</text>
-          </svg>
+      <Reveal delay={0.1} className="min-w-0 lg:col-span-6 lg:col-start-7">
+        <figure className="panel p-4 sm:p-5">
+          <div className="sm:hidden"><CostChart compact /></div>
+          <div className="hidden sm:block"><CostChart /></div>
           <figcaption className="mt-3 font-mono text-[11px] text-slate-500">
             <span className="text-slate-800">Fig. 2.</span> Relative cost per answer across successive related queries. Illustrative of our goal; not a measured result.
           </figcaption>
@@ -280,9 +303,9 @@ function Commitments() {
     { id: "C3", tag: "Efficient", title: "Built for everyday hardware", text: "Capable reasoning on laptops and edge devices, keeping data private and costs low." },
   ];
   return (
-    <section className="py-16">
+    <section className="py-12 md:py-16">
       <SectionHead no="4" label="Commitments" title="Three design constraints we hold ourselves to." />
-      <div className="mt-10 grid border-t border-slate-200 md:grid-cols-3">
+      <div className="mt-8 grid border-t border-slate-200 md:mt-10 md:grid-cols-3">
         {items.map((it, i) => (
           <Reveal key={it.id} delay={i * 0.08} className={`group py-7 md:px-7 ${i ? "border-t border-slate-200 md:border-l md:border-t-0" : "md:pl-0"}`}>
             <div className="flex items-baseline justify-between font-mono text-[11px] uppercase tracking-[0.14em]">
@@ -305,11 +328,20 @@ function Applications() {
     ["A3", "Privacy-sensitive and on-device products", "Sending every request to a large cloud model is not an option."],
   ];
   return (
-    <section className="py-16">
+    <section className="py-12 md:py-16">
       <SectionHead no="5" label="Applications" title="Where repeated reasoning is most expensive." />
-      <Reveal delay={0.05} className="mt-10">
-        <div className="panel overflow-x-auto">
-          <table className="w-full min-w-[560px] text-left">
+      <Reveal delay={0.05} className="mt-8 md:mt-10">
+        <ul className="panel divide-y divide-slate-200 md:hidden">
+          {rows.map(([id, a, b]) => (
+            <li key={id} className="p-5">
+              <span className="font-mono text-xs text-indigo-600">{id}</span>
+              <p className="mt-1.5 text-[15px] font-medium text-slate-900">{a}</p>
+              <p className="mt-1 text-slate-600">{b}</p>
+            </li>
+          ))}
+        </ul>
+        <div className="panel hidden overflow-x-auto md:block">
+          <table className="w-full text-left">
             <thead>
               <tr className="border-b border-slate-200 font-mono text-[11px] uppercase tracking-[0.14em] text-slate-500">
                 <th className="w-16 px-5 py-3 font-medium">ID</th>
@@ -335,9 +367,9 @@ function Applications() {
 
 function Correspondence() {
   return (
-    <section className="py-16">
+    <section className="py-12 md:py-16">
       <Reveal>
-        <div className="panel grid gap-8 p-8 md:grid-cols-[1fr_auto] md:items-end md:p-12">
+        <div className="panel grid gap-8 p-6 sm:p-8 md:grid-cols-[1fr_auto] md:items-end md:p-12">
           <div>
             <span className="label">Correspondence</span>
             <h2 className="mt-3 text-3xl leading-[1.12] md:text-[2.6rem]">We are early, and we publish only what we have measured.</h2>

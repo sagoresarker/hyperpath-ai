@@ -12,7 +12,7 @@ function TopBar({ current }) {
   const [open, setOpen] = useState(false);
   return (
     <header className="topbar sticky top-0 z-40 border-b border-slate-200 backdrop-blur">
-      <div className="mx-auto flex max-w-7xl items-center gap-6 px-5 py-2.5">
+      <div className="mx-auto flex max-w-7xl items-center gap-4 px-5 py-2.5 md:gap-6">
         <a href="./" className="flex shrink-0 items-center gap-2.5" aria-label="Hyperpath AI home">
           <LogoMark />
           <span className="text-[15px] font-semibold tracking-tight text-slate-900">Hyperpath&nbsp;AI</span>
@@ -49,9 +49,9 @@ function TopBar({ current }) {
           {open ? "Close" : "Menu"}
         </button>
       </div>
-      <div className="flex gap-4 overflow-x-auto border-t border-slate-200 px-5 py-1.5 md:hidden" aria-label="System status">
+      <div className="flex gap-4 border-t border-slate-200 px-5 py-1.5 md:hidden" aria-label="System status">
         <StatusTag live>Status: research-led</StatusTag>
-        <StatusTag>Verified reuse v1.2</StatusTag>
+        <span className="hidden min-[420px]:inline-flex"><StatusTag>Reuse v1.2</StatusTag></span>
       </div>
       <AnimatePresence>
         {open && (
