@@ -150,3 +150,74 @@ section.hero { border-top: 0; padding-block: clamp(48px, 8vw, 96px) clamp(56px, 
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; animation: none !important; }
 }
+
+/* ---------- Motion ---------- */
+:root { --glow: #2443d6; }
+
+/* Hero entrance */
+@keyframes rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+.hero .stack > * { animation: rise 0.8s cubic-bezier(.2,.7,.2,1) both; }
+.hero .stack > *:nth-child(2) { animation-delay: 0.08s; }
+.hero .stack > *:nth-child(3) { animation-delay: 0.18s; }
+.hero .stack > *:nth-child(4) { animation-delay: 0.28s; }
+.hero-figure { animation: rise 1s 0.2s cubic-bezier(.2,.7,.2,1) both; }
+
+/* Animated gradient on the key phrase */
+.shimmer {
+  background: linear-gradient(90deg, var(--ink) 0%, var(--accent) 35%, #8b5cf6 55%, var(--ink) 80%);
+  background-size: 250% 100%;
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  animation: shimmer 6s ease-in-out infinite;
+}
+@keyframes shimmer { 0%,100% { background-position: 100% 0; } 50% { background-position: 0% 0; } }
+
+/* Hero figure: soft glow and live caption */
+.hero-figure { box-shadow: 0 30px 80px -40px color-mix(in srgb, var(--accent) 55%, transparent); }
+.hero-figure::before {
+  content: ""; position: absolute; inset: -40%; pointer-events: none;
+  background: radial-gradient(circle at 30% 30%, color-mix(in srgb, var(--accent) 14%, transparent), transparent 45%),
+              radial-gradient(circle at 75% 70%, color-mix(in srgb, #8b5cf6 12%, transparent), transparent 45%);
+  animation: drift 14s ease-in-out infinite alternate;
+}
+@keyframes drift { to { transform: translate(8%, -6%) rotate(8deg); } }
+.hero-figure figcaption { display: flex; align-items: center; gap: 8px; }
+.live-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 0 var(--accent); animation: live 1.8s infinite; flex: none; }
+@keyframes live { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 60%, transparent); } 100% { box-shadow: 0 0 0 10px transparent; } }
+#paths-caption.show { animation: rise 0.5s ease both; }
+
+/* Buttons: lift on hover */
+.btn { transition: transform .2s ease, background .2s ease, color .2s ease, border-color .2s ease; }
+.btn:hover { transform: translateY(-2px); }
+
+/* Scroll reveal (only when JS has opted in) */
+.js-reveal main section:not(.hero) .split > *,
+.js-reveal main section:not(.hero) > .stack > *,
+.js-reveal main section:not(.hero) .cta,
+.js-reveal .pillar, .js-reveal .list-plain li, .js-reveal .card, .js-reveal .channel {
+  opacity: 0; transform: translateY(24px);
+  transition: opacity .8s cubic-bezier(.2,.7,.2,1) var(--d, 0ms), transform .8s cubic-bezier(.2,.7,.2,1) var(--d, 0ms);
+}
+.js-reveal .in { opacity: 1 !important; transform: none !important; }
+
+/* Bars grow when revealed */
+.bars span { transform-origin: bottom; transition: transform 1s cubic-bezier(.2,.7,.2,1); }
+.js-reveal .cost-compare:not(.in) .bars span { transform: scaleY(0.04); }
+.bars.reuse span:nth-child(2) { transition-delay: .08s } .bars.reuse span:nth-child(3) { transition-delay: .16s }
+.bars.reuse span:nth-child(4) { transition-delay: .24s } .bars.reuse span:nth-child(5) { transition-delay: .32s }
+.bars.reuse span:nth-child(6) { transition-delay: .40s } .bars.reuse span:nth-child(7) { transition-delay: .48s }
+.bars.reuse span:nth-child(8) { transition-delay: .56s }
+.bars.reuse span { background: linear-gradient(180deg, #8b5cf6, var(--accent)); }
+
+/* Cards and pillars respond to hover */
+.card, .stat, .channel { transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease; }
+.card:hover, .stat:hover { transform: translateY(-4px); border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); box-shadow: 0 20px 40px -28px color-mix(in srgb, var(--accent) 60%, transparent); }
+.list-plain .dot { box-shadow: 0 0 0 4px var(--accent-soft); }
+
+/* CTA: slow moving gradient */
+.cta { background: linear-gradient(120deg, var(--ink), color-mix(in srgb, var(--accent) 35%, var(--ink)), var(--ink)); background-size: 200% 200%; animation: ctaflow 12s ease infinite; }
+@keyframes ctaflow { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .hero .stack > *, .hero-figure, .hero-figure::before, .live-dot, .shimmer, .cta, #paths-caption.show { animation: none !important; }
+  .js-reveal * { opacity: 1 !important; transform: none !important; }
+}

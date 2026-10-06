@@ -26,7 +26,7 @@
   <div class="hero-grid">
     <div class="stack">
       <span class="eyebrow">Reasoning infrastructure</span>
-      <h1>AI that gets cheaper the more it&nbsp;thinks.</h1>
+      <h1>AI that gets <span class="shimmer">cheaper</span> the more it&nbsp;thinks.</h1>
       <p class="lede">Every AI answer today is reasoned from scratch and then thrown away. Hyperpath AI is building infrastructure that lets reasoning be kept, checked and used again, so each answer costs less than the one before.</p>
       <div class="actions">
         <a class="btn primary" href="contact.html">Talk to us</a>
@@ -34,8 +34,8 @@
       </div>
     </div>
     <figure class="hero-figure">
-      <canvas id="paths" role="img" aria-label="Diagram of connected points; a path of earlier reasoning lights up and is reused."></canvas>
-      <figcaption>Earlier reasoning, lit up and reused</figcaption>
+      <canvas id="paths" role="img" aria-label="Animated diagram: a first query builds a path of reasoning steps slowly; a second query reuses the same path almost instantly."></canvas>
+      <figcaption><span class="live-dot" aria-hidden="true"></span><span id="paths-caption" class="show" aria-live="off">Query 1 · reasoning each step from scratch</span></figcaption>
     </figure>
   </div>
 </section>
@@ -49,7 +49,7 @@
     <div class="stack">
       <p>When thousands of people ask related questions, a model works through many of the same steps for each of them. The work is done, billed, and discarded. As models reason more deeply before they answer, that repeated cost keeps growing.</p>
       <div class="stat">
-        <span class="figure">55%</span>
+        <span class="figure" data-count="55" data-suffix="%">55%</span>
         <span>of AI cloud spending in 2026 went to running models rather than training them, the first year inference came out ahead.</span>
         <span class="source">Source: Gartner, reported by <a href="https://www.techtimes.com/articles/323879/20260811/gartner-marks-first-year-inference-spending-beats-ai-training-55-cents-every-cloud-dollar.htm">TechTimes</a>, August 2026.</span>
       </div>
