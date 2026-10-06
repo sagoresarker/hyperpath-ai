@@ -1,65 +1,65 @@
 import { useEffect, useRef, useState } from "react";
 import { m, useInView, useReducedMotion } from "framer-motion";
 
-const spring = { type: "spring", stiffness: 420, damping: 18 };
-
-/** Chunky cartoon button with a spring hover/press. Renders <a> when href is given. */
-export function PopButton({ href, onClick, children, tone = "ink", className = "", ...rest }) {
-  const tones = {
-    ink: "bg-ink text-white",
-    sun: "bg-sun text-ink",
-    pink: "bg-pink text-white",
-    white: "bg-white text-ink",
-    mint: "bg-mint text-ink",
-  };
+/** Precision "tool" button: hairline border, square corners, mono label, soft hover glow. */
+export function ToolButton({ children, onClick, disabled, primary = false, href, className = "" }) {
   const Comp = href ? m.a : m.button;
   return (
     <Comp
       href={href}
-      onClick={onClick}
       type={href ? undefined : "button"}
-      className={`inline-flex items-center gap-2 font-display font-bold text-base md:text-lg px-5 py-3 rounded-2xl border-3 border-ink shadow-pop select-none ${tones[tone]} ${className}`}
-      whileHover={{ y: -3, x: -1, boxShadow: "8px 9px 0 0 #16133A", transition: spring }}
-      whileTap={{ y: 3, x: 3, boxShadow: "1px 1px 0 0 #16133A", scale: 0.98, transition: spring }}
-      {...rest}
+      onClick={onClick}
+      disabled={disabled}
+      className={`tool-btn group inline-flex items-center gap-2 border px-3.5 py-2 font-mono text-[11px] font-medium uppercase tracking-[0.12em] transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
+        primary
+          ? "border-slate-900 bg-slate-900 text-white hover:border-indigo-600 hover:bg-indigo-600 dark:border-slate-100 dark:bg-slate-100 dark:text-slate-900 dark:hover:border-indigo-400 dark:hover:bg-indigo-400"
+          : "border-slate-300 bg-transparent text-slate-800 hover:border-indigo-500 hover:text-indigo-700 dark:border-slate-700 dark:text-slate-200 dark:hover:border-indigo-400 dark:hover:text-indigo-300"
+      } ${className}`}
+      whileTap={disabled ? {} : { scale: 0.98 }}
     >
+      <span aria-hidden className="text-[9px] opacity-60 transition-transform group-hover:translate-x-0.5 group-hover:opacity-100">▸</span>
       {children}
     </Comp>
   );
 }
 
-/** High-contrast badge with a little wobble on hover. */
-export function Badge({ children, tone = "sun", icon, className = "" }) {
-  const tones = {
-    sun: "bg-sun text-ink",
-    pink: "bg-pink text-white",
-    mint: "bg-mint text-ink",
-    sky: "bg-sky text-white",
-    grape: "bg-grape text-white",
-    white: "bg-white text-ink",
-    tang: "bg-tang text-ink",
-  };
+/** System status tag, e.g. [ STATUS: RESEARCH-LED ]. */
+export function StatusTag({ children, live = false }) {
   return (
-    <m.span
-      className={`inline-flex items-center gap-1.5 rounded-full border-3 border-ink px-3 py-1 font-mono text-xs font-bold uppercase tracking-wider shadow-popsm ${tones[tone]} ${className}`}
-      whileHover={{ rotate: [0, -4, 4, 0], scale: 1.06, transition: { duration: 0.4 } }}
-    >
-      {icon && <span aria-hidden>{icon}</span>}
+    <span className="inline-flex items-center gap-1.5 whitespace-nowrap font-mono text-[10.5px] uppercase tracking-[0.14em] text-slate-600 dark:text-slate-400">
+      <span className="text-slate-400 dark:text-slate-600">[</span>
+      {live && <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" aria-hidden />}
       {children}
-    </m.span>
+      <span className="text-slate-400 dark:text-slate-600">]</span>
+    </span>
   );
 }
 
-/** Fades and springs children up when they scroll into view. */
+/** Numbered section header in the style of a technical paper. */
+export function SectionHead({ no, label, title, children, className = "" }) {
+  return (
+    <Reveal className={`space-y-3 ${className}`}>
+      <div className="flex items-baseline gap-3">
+        <span className="font-mono text-xs text-indigo-600 dark:text-indigo-400">§{no}</span>
+        <span className="label">{label}</span>
+        <span className="h-px flex-1 translate-y-[-3px] bg-slate-200 dark:bg-slate-800" aria-hidden />
+      </div>
+      {title && <h2 className="text-3xl md:text-[2.6rem] leading-[1.1]">{title}</h2>}
+      {children}
+    </Reveal>
+  );
+}
+
+/** Subtle fade-and-rise when scrolled into view. */
 export function Reveal({ children, delay = 0, className = "", as = "div" }) {
   const Comp = m[as];
   return (
     <Comp
       className={className}
-      initial={{ opacity: 0, y: 28, scale: 0.98 }}
-      whileInView={{ opacity: 1, y: 0, scale: 1 }}
+      initial={{ opacity: 0, y: 14 }}
+      whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-60px" }}
-      transition={{ type: "spring", stiffness: 140, damping: 18, delay }}
+      transition={{ duration: 0.6, ease: [0.2, 0.7, 0.2, 1], delay }}
     >
       {children}
     </Comp>
@@ -84,23 +84,18 @@ export function CountUp({ to, suffix = "", duration = 1400, className = "" }) {
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
   }, [inView, reduce, to, duration]);
-  return (
-    <span ref={ref} className={className}>
-      {val}
-      {suffix}
-    </span>
-  );
+  return <span ref={ref} className={className}>{val}{suffix}</span>;
 }
 
-/** Small logo mark: three nodes joined into one, in cartoon style. */
-export function LogoMark({ size = 34 }) {
+/** Logo mark: two inputs joined into one conclusion, drawn in hairlines. */
+export function LogoMark({ size = 22 }) {
   return (
-    <m.svg viewBox="0 0 40 40" width={size} height={size} aria-hidden whileHover={{ rotate: -12, scale: 1.1, transition: spring }}>
-      <rect x="1.5" y="1.5" width="37" height="37" rx="11" fill="#3B5BFF" stroke="#16133A" strokeWidth="3" />
-      <path d="M11 13 C19 15 21 18 28 20 M11 27 C19 25 21 22 28 20" stroke="#FFC93C" strokeWidth="3.4" fill="none" strokeLinecap="round" />
-      <circle cx="11" cy="13" r="4" fill="#fff" stroke="#16133A" strokeWidth="2.4" />
-      <circle cx="11" cy="27" r="4" fill="#fff" stroke="#16133A" strokeWidth="2.4" />
-      <circle cx="29" cy="20" r="5" fill="#FF4D8D" stroke="#16133A" strokeWidth="2.4" />
-    </m.svg>
+    <svg viewBox="0 0 24 24" width={size} height={size} aria-hidden className="text-slate-900 dark:text-slate-100">
+      <rect x="0.5" y="0.5" width="23" height="23" fill="none" stroke="currentColor" strokeWidth="1" />
+      <path d="M6 7 C11 8 12 10.5 17 12 M6 17 C11 16 12 13.5 17 12" fill="none" stroke="#6366F1" strokeWidth="1.4" />
+      <circle cx="6" cy="7" r="1.8" fill="currentColor" />
+      <circle cx="6" cy="17" r="1.8" fill="currentColor" />
+      <circle cx="17.5" cy="12" r="2.4" fill="#6366F1" />
+    </svg>
   );
 }

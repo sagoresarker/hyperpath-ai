@@ -2,28 +2,79 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Theme tokens. The canvas engine reads the --c-* values. */
+:root {
+  --c-page: #F6F7F3;
+  --c-surface: #FCFCFA;
+  --c-ink: #0F172A;
+  --c-muted: #64748B;
+  --c-faint: #CBD5E1;
+  --c-grid: #E2E8F0;
+  --c-q: #4F46E5;
+  --c-a: #0F172A;
+  --c-fact: #B45309;
+  --c-reuse: #059669;
+  --c-step-0: #4338CA;
+  --c-step-1: #6366F1;
+  --c-step-2: #0284C7;
+  --c-step-3: #0D9488;
+  --c-step-4: #7C3AED;
+  --grid-minor: rgba(15, 23, 42, 0.045);
+  --grid-major: rgba(15, 23, 42, 0.08);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --c-page: #0B0E14;
+    --c-surface: #10141B;
+    --c-ink: #E2E8F0;
+    --c-muted: #94A3B8;
+    --c-faint: #334155;
+    --c-grid: #1E293B;
+    --c-q: #818CF8;
+    --c-a: #E2E8F0;
+    --c-fact: #F59E0B;
+    --c-reuse: #34D399;
+    --c-step-0: #818CF8;
+    --c-step-1: #A5B4FC;
+    --c-step-2: #38BDF8;
+    --c-step-3: #2DD4BF;
+    --c-step-4: #C4B5FD;
+    --grid-minor: rgba(226, 232, 240, 0.035);
+    --grid-major: rgba(226, 232, 240, 0.07);
+    color-scheme: dark;
+  }
+}
+
 @layer base {
   html { scroll-behavior: smooth; }
-  body { @apply bg-paper text-ink font-body antialiased; }
-  h1, h2, h3 { @apply font-display tracking-tight; text-wrap: balance; }
-  ::selection { background: #FFC93C; color: #16133A; }
-  a:focus-visible, button:focus-visible { outline: 3px solid #3B5BFF; outline-offset: 3px; border-radius: 12px; }
+  body {
+    @apply font-sans text-slate-900 antialiased dark:text-slate-100;
+    background-color: var(--c-page);
+    /* engineering graph paper: minor 24px, major 120px */
+    background-image:
+      linear-gradient(var(--grid-major) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-major) 1px, transparent 1px),
+      linear-gradient(var(--grid-minor) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-minor) 1px, transparent 1px);
+    background-size: 120px 120px, 120px 120px, 24px 24px, 24px 24px;
+    background-position: -1px -1px;
+  }
+  h1, h2, h3 { @apply font-serif font-medium tracking-tight; text-wrap: balance; }
+  ::selection { background: #C7D2FE; color: #0F172A; }
+  a:focus-visible, button:focus-visible { outline: 1px solid #6366F1; outline-offset: 3px; }
 }
 
 @layer components {
-  .card-pop { @apply bg-white border-3 border-ink rounded-3xl shadow-pop; }
-  .eyebrow { @apply font-mono text-xs font-bold uppercase tracking-[0.14em]; }
-  .marker { position: relative; display: inline-block; z-index: 0; }
-  .marker::after {
-    content: ""; position: absolute; left: -0.08em; right: -0.08em; bottom: 0.06em; height: 0.42em;
-    background: var(--marker, #FFC93C); border-radius: 0.2em; z-index: -1; transform: rotate(-1.2deg);
-  }
-  .dot-grid {
-    background-image: radial-gradient(rgba(22, 19, 58, 0.09) 1.2px, transparent 1.2px);
-    background-size: 22px 22px;
-  }
+  .label { @apply font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400; }
+  .hairline { @apply border-slate-200 dark:border-slate-800; }
+  .panel { @apply border border-slate-200 bg-[var(--c-surface)] dark:border-slate-800; }
+  .tool-btn:not(:disabled):hover { box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.25), 0 0 22px -4px rgba(99, 102, 241, 0.45); }
+  .cite { @apply font-mono text-[0.7em] align-super text-indigo-600 dark:text-indigo-400 no-underline; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
 }
+
+.topbar { background: color-mix(in srgb, var(--c-page) 86%, transparent); }

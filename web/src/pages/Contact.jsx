@@ -1,63 +1,61 @@
 import { useState } from "react";
 import { m } from "framer-motion";
 import Layout from "../components/Layout.jsx";
-import { Hops, Bubble } from "../components/Mascots.jsx";
-import { Badge, PopButton, Reveal } from "../components/ui.jsx";
+import { ToolButton, SectionHead, Reveal } from "../components/ui.jsx";
 
 const REPO = "https://github.com/sagoresarkerbdcse/hyperpath-ai";
 const topics = [
-  { tag: "Partnerships", title: "Early design partners", text: "Teams whose AI costs grow with usage, and who want to shape what we build.", tone: "bg-pink text-white", icon: "🤝" },
-  { tag: "Research", title: "Collaboration", text: "Academic and industry researchers working on reasoning, memory or efficient inference.", tone: "bg-mint", icon: "🧪" },
-  { tag: "People", title: "Joining us", text: "Researchers and engineers who want to work on these problems early.", tone: "bg-sky text-white", icon: "🚀" },
+  ["T1", "Design partners", "Teams whose AI costs grow with usage and who want to shape what we build."],
+  ["T2", "Research collaboration", "Academic and industry researchers working on reasoning, memory or efficient inference."],
+  ["T3", "Joining the team", "Researchers and engineers who want to work on these problems early."],
 ];
 
 export default function Contact() {
   const [copied, setCopied] = useState("");
   const copy = async () => {
-    try { await navigator.clipboard.writeText(REPO); setCopied("Copied!"); }
-    catch { setCopied("Select the link above to copy it"); }
-    setTimeout(() => setCopied(""), 2200);
+    try { await navigator.clipboard.writeText(REPO); setCopied("copied to clipboard"); }
+    catch { setCopied("select the address above to copy it"); }
+    setTimeout(() => setCopied(""), 2400);
   };
   return (
     <Layout current="contact">
-      <section className="mx-auto max-w-6xl pt-12 pb-12 grid gap-10 lg:grid-cols-[1.3fr_0.7fr] items-center">
-        <div className="space-y-6">
-          <Badge tone="pink" icon="💬">Contact</Badge>
-          <m.h1 className="text-[clamp(2.8rem,7vw,5.4rem)] font-extrabold leading-[0.95]" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", stiffness: 200, damping: 16 }}>
-            Let's <span className="marker" style={{ "--marker": "#22D3A680" }}>talk.</span>
+      <section className="grid gap-8 pb-12 pt-12 lg:grid-cols-12">
+        <div className="lg:col-span-8">
+          <span className="label">Correspondence</span>
+          <m.h1 className="mt-5 text-[clamp(2.8rem,7vw,5.6rem)] leading-[1] tracking-[-0.02em]" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
+            Let’s <em className="font-normal text-indigo-600 dark:text-indigo-400">talk</em>.
           </m.h1>
-          <p className="text-xl font-semibold text-ink/75 max-w-2xl">We'd love to hear from organisations that run AI at scale, researchers working on reasoning and efficiency, and people who want to build this with us.</p>
         </div>
-        <div className="flex items-end justify-center gap-2">
-          <Hops size={130} wave />
-          <Bubble side="left" className="mb-28 w-52"><p className="text-sm font-bold">Say hi! I promise I'll remember it. 😉</p></Bubble>
+        <p className="self-end text-lg leading-relaxed text-slate-700 lg:col-span-4 dark:text-slate-300">
+          We welcome conversations with organisations running AI at scale, researchers working on reasoning and efficiency, and people who want to build this with us.
+        </p>
+      </section>
+
+      <section className="py-10">
+        <SectionHead no="1" label="Topics" />
+        <div className="mt-8 grid border-t border-slate-200 md:grid-cols-3 dark:border-slate-800">
+          {topics.map(([id, t, d], i) => (
+            <Reveal key={id} delay={i * 0.06} className={`py-7 md:px-7 ${i ? "border-t border-slate-200 md:border-l md:border-t-0 dark:border-slate-800" : "md:pl-0"}`}>
+              <span className="font-mono text-xs text-indigo-600 dark:text-indigo-400">{id}</span>
+              <h2 className="mt-3 text-2xl">{t}</h2>
+              <p className="mt-2 leading-relaxed text-slate-600 dark:text-slate-400">{d}</p>
+            </Reveal>
+          ))}
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl py-8 grid gap-6 md:grid-cols-3">
-        {topics.map((t, i) => (
-          <Reveal key={t.tag} delay={i * 0.1}>
-            <m.div className={`h-full rounded-3xl border-3 border-ink p-6 shadow-pop ${t.tone}`} whileHover={{ y: -8, rotate: i === 1 ? 0 : i ? 1.5 : -1.5, boxShadow: "10px 12px 0 0 #16133A" }} transition={{ type: "spring", stiffness: 320, damping: 14 }}>
-              <span className="mb-4 grid h-12 w-12 place-items-center rounded-2xl border-3 border-ink bg-white text-xl">{t.icon}</span>
-              <span className="eyebrow opacity-80">{t.tag}</span>
-              <h2 className="mt-1 text-2xl font-extrabold">{t.title}</h2>
-              <p className="mt-2 font-semibold opacity-85">{t.text}</p>
-            </m.div>
-          </Reveal>
-        ))}
-      </section>
-
-      <section className="mx-auto max-w-6xl py-12">
-        <Reveal>
-          <div className="card-pop p-7 md:p-10 space-y-4">
-            <span className="eyebrow text-grape">Reach us</span>
-            <p className="font-mono text-base md:text-lg font-bold break-all">{REPO}</p>
-            <p className="font-semibold text-ink/70">For now, the quickest way to reach the team is through our GitHub profile.</p>
-            <div className="flex flex-wrap items-center gap-3">
-              <PopButton href={REPO} tone="ink">Open GitHub →</PopButton>
-              <PopButton onClick={copy} tone="white">Copy link</PopButton>
-              <span className="font-bold text-sm" aria-live="polite">{copied}</span>
-            </div>
+      <section className="py-10">
+        <SectionHead no="2" label="Channel" />
+        <Reveal className="panel mt-8 p-7 md:p-10">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 font-mono text-sm">
+            <span className="text-slate-500 dark:text-slate-400">github&gt;</span>
+            <span className="break-all text-slate-900 dark:text-slate-100">{REPO}</span>
+          </div>
+          <p className="mt-3 text-slate-600 dark:text-slate-400">For now, the quickest way to reach the team is through our GitHub profile.</p>
+          <div className="mt-6 flex flex-wrap items-center gap-3">
+            <ToolButton primary href={REPO}>Open GitHub</ToolButton>
+            <ToolButton onClick={copy}>Copy address</ToolButton>
+            <span className="font-mono text-[11px] text-slate-500 dark:text-slate-400" aria-live="polite">{copied}</span>
           </div>
         </Reveal>
       </section>

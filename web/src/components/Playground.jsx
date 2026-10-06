@@ -1,10 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { m, AnimatePresence } from "framer-motion";
-import { Hops, Bubble } from "./Mascots.jsx";
-import { Badge } from "./ui.jsx";
+import { ToolButton } from "./ui.jsx";
 
-const INK = "#16133A";
-const STEP_COLORS = ["#3B5BFF", "#8B5CF6", "#FF4D8D", "#FF8A3D", "#22D3A6"];
 const QUESTIONS = {
   fresh: "How much paint for a 4 × 5 m room?",
   similar: ["…and for a 3 × 6 m room?", "…with a thicker paint?", "…for two coats?"],
@@ -12,11 +9,27 @@ const QUESTIONS = {
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 // ---------------------------------------------------------------------------
-// Canvas engine: nodes with spring physics, cartoon edges, pulses, stickers.
+// Canvas engine: nodes with spring physics, edges, pulses, labels.
+// Visual styling comes from CSS custom properties (--c-*) so it follows the
+// site theme; node logic, physics and timings are unchanged.
 // ---------------------------------------------------------------------------
 function createEngine(canvas, reduce) {
   const ctx = canvas.getContext("2d");
   let W = 0, H = 0, raf = 0, alive = true;
+
+  const readTheme = () => {
+    const cs = getComputedStyle(canvas);
+    const g = (n) => cs.getPropertyValue(n).trim();
+    return {
+      ink: g("--c-ink"), muted: g("--c-muted"), surface: g("--c-surface"), faint: g("--c-faint"), grid: g("--c-grid"),
+      q: g("--c-q"), a: g("--c-a"), fact: g("--c-fact"), reuse: g("--c-reuse"),
+      steps: [0, 1, 2, 3, 4].map((i) => g(`--c-step-${i}`)),
+    };
+  };
+  let T = readTheme();
+  const themeQuery = window.matchMedia("(prefers-color-scheme: dark)");
+  const onTheme = () => (T = readTheme());
+  themeQuery.addEventListener?.("change", onTheme);
 
   // Deterministic layout.
   let seed = 5;
@@ -103,8 +116,8 @@ function createEngine(canvas, reduce) {
     ctx.moveTo(x1, y1);
     for (let k = 1; k <= n; k++) ctx.lineTo(...pt(Math.min(prog, k / steps)));
     ctx.lineCap = "round";
-    ctx.lineWidth = width + 5; ctx.strokeStyle = INK; ctx.stroke();
-    ctx.lineWidth = width; ctx.strokeStyle = color; ctx.stroke();
+    ctx.lineWidth = width * 0.45 + 4; ctx.strokeStyle = color + "1f"; ctx.stroke();
+    ctx.lineWidth = width * 0.45; ctx.strokeStyle = color; ctx.stroke();
     return pt;
   }
 
@@ -130,8 +143,8 @@ function createEngine(canvas, reduce) {
     for (const e of edges) e.p += (e.target - e.p) * (reduce ? 1 : e.rate);
 
     // Decorative faint links between nearby deco nodes.
-    ctx.lineWidth = 1.5;
-    ctx.strokeStyle = "rgba(22,19,58,0.10)";
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = T.grid;
     for (let i = 0; i < nodes.length; i++) for (let j = i + 1; j < nodes.length; j++) {
       if (nodes[i].kind !== "deco" && nodes[j].kind !== "deco") continue;
       const [x1, y1] = P(i), [x2, y2] = P(j);
@@ -142,8 +155,8 @@ function createEngine(canvas, reduce) {
     edges.forEach((e, k) => {
       if (e.p < 0.02) return;
       const from = chain[k], to = chain[k + 1], fact = e.fact;
-      const col = STEP_COLORS[k];
-      ctx.globalAlpha = Math.min(1, e.p) * (e.mode === "reused" ? 0.28 : 0.2);
+      const col = T.steps[k];
+      ctx.globalAlpha = Math.min(1, e.p) * (e.mode === "reused" ? 0.14 : 0.09);
       roundBlob([P(from), P(fact), P(to)], 16, col);
       ctx.globalAlpha = 1;
       curve(P(fact), P(to), Math.min(1, e.p), col, 3.5);
@@ -161,8 +174,8 @@ function createEngine(canvas, reduce) {
       const g = ctx.createRadialGradient(x, y, 0, x, y, 26);
       g.addColorStop(0, pu.color + "ee"); g.addColorStop(1, pu.color + "00");
       ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, 26, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.arc(x, y, 6, 0, Math.PI * 2); ctx.fillStyle = "#fff"; ctx.fill();
-      ctx.lineWidth = 3; ctx.strokeStyle = INK; ctx.stroke();
+      ctx.beginPath(); ctx.arc(x, y, 4.5, 0, Math.PI * 2); ctx.fillStyle = T.surface; ctx.fill();
+      ctx.lineWidth = 1.5; ctx.strokeStyle = pu.color; ctx.stroke();
       if (!reduce && Math.random() < 0.6) sparks.push({ x, y, vx: (Math.random() - 0.5) * 1.4, vy: (Math.random() - 0.5) * 1.4, life: 0.8, c: pu.color });
       if (t >= 1) pulses.splice(i, 1);
     }
@@ -173,33 +186,31 @@ function createEngine(canvas, reduce) {
       const r = n.r * n.s;
       if (n.kind === "deco") {
         ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(22,19,58,0.22)"; ctx.fill();
+        ctx.fillStyle = T.faint; ctx.fill();
         return;
       }
       if (n.lit > 0.05) {
         ctx.beginPath(); ctx.arc(x, y, r + 9 * n.lit, 0, Math.PI * 2);
-        ctx.fillStyle = n.color + "40"; ctx.fill();
+        ctx.fillStyle = n.color + "26"; ctx.fill();
       }
-      // drop shadow (cartoon offset)
-      ctx.beginPath(); ctx.arc(x + 3, y + 3, r, 0, Math.PI * 2); ctx.fillStyle = INK; ctx.fill();
       ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2);
-      const base = n.kind === "q" ? "#3B5BFF" : n.kind === "a" ? "#FF4D8D" : n.kind === "fact" ? "#FFC93C" : "#ffffff";
+      const base = n.kind === "q" ? T.q : n.kind === "a" ? T.a : T.surface;
       ctx.fillStyle = n.kind === "step" && n.lit > 0.5 ? n.color : base;
       ctx.fill();
-      ctx.lineWidth = 3; ctx.strokeStyle = INK; ctx.stroke();
-      // highlight
-      ctx.beginPath(); ctx.arc(x - r * 0.35, y - r * 0.35, r * 0.28, 0, Math.PI * 2); ctx.fillStyle = "rgba(255,255,255,0.7)"; ctx.fill();
+      ctx.lineWidth = n.kind === "fact" || n.kind === "step" ? 1.5 : 1;
+      ctx.strokeStyle = n.kind === "fact" ? T.fact : n.kind === "step" ? (n.lit > 0.5 ? n.color : T.muted) : T.ink;
+      ctx.stroke();
       if (n.kind === "q" || n.kind === "a") {
-        ctx.fillStyle = "#fff";
-        ctx.font = `800 ${Math.round(r * 1.15)}px "Bricolage Grotesque", sans-serif`;
+        ctx.fillStyle = T.surface;
+        ctx.font = `600 ${Math.round(r * 0.95)}px "IBM Plex Mono", monospace`;
         ctx.textAlign = "center"; ctx.textBaseline = "middle";
         ctx.fillText(n.kind === "q" ? "?" : "!", x, y + 1);
       }
     });
 
     // Labels for question and answer.
-    ctx.font = '700 11px "JetBrains Mono", monospace';
-    ctx.fillStyle = INK; ctx.textAlign = "center"; ctx.textBaseline = "alphabetic";
+    ctx.font = '500 10px "IBM Plex Mono", monospace';
+    ctx.fillStyle = T.muted; ctx.textAlign = "center"; ctx.textBaseline = "alphabetic";
     { const [x, y] = P(Q); ctx.fillText("QUESTION", x, y + 34); }
     { const [x, y] = P(A); ctx.fillText("ANSWER", x, y + 34); }
 
@@ -220,15 +231,14 @@ function createEngine(canvas, reduce) {
       if (st.life <= 0) { stickers.splice(i, 1); continue; }
       const pop = Math.min(1, (1 - st.life) * 8);
       const scale = 0.6 + 0.4 * pop + Math.sin(pop * Math.PI) * 0.15;
-      ctx.font = '800 12px "JetBrains Mono", monospace';
-      const w = ctx.measureText(st.text).width + 16;
+      ctx.font = '500 10.5px "IBM Plex Mono", monospace';
+      const w = ctx.measureText(st.text).width + 14;
       const sx = Math.min(Math.max(st.x, w / 2 + 6), W - w / 2 - 6);
       ctx.save(); ctx.translate(sx, Math.max(st.y, 16)); ctx.scale(scale, scale); ctx.globalAlpha = Math.min(1, st.life * 2);
-      ctx.font = '800 12px "JetBrains Mono", monospace';
-      ctx.fillStyle = INK; roundRect(-w / 2 + 2, -11 + 2, w, 22, 11); ctx.fill();
-      ctx.fillStyle = st.color; roundRect(-w / 2, -11, w, 22, 11); ctx.fill();
-      ctx.lineWidth = 2.5; ctx.strokeStyle = INK; ctx.stroke();
-      ctx.fillStyle = st.color === "#FFC93C" || st.color === "#22D3A6" ? INK : "#fff";
+      ctx.font = '500 10.5px "IBM Plex Mono", monospace';
+      ctx.fillStyle = T.surface; roundRect(-w / 2, -10, w, 20, 2); ctx.fill();
+      ctx.lineWidth = 1; ctx.strokeStyle = st.color; ctx.stroke();
+      ctx.fillStyle = st.color;
       ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(st.text, 0, 1);
       ctx.restore();
     }
@@ -246,7 +256,7 @@ function createEngine(canvas, reduce) {
   const local = (e) => { const r = canvas.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
   const onDown = (e) => {
     const [x, y] = local(e); const i = hit(x, y);
-    if (i >= 0) { bounce(i, 1.4); burst(i, nodes[i].kind === "deco" ? "#8B5CF6" : nodes[i].kind === "fact" ? "#FFC93C" : "#FF4D8D", 10); }
+    if (i >= 0) { bounce(i, 1.4); burst(i, nodes[i].kind === "deco" ? T.steps[1] : nodes[i].kind === "fact" ? T.fact : T.a, 10); }
   };
   const onMove = (e) => { const [x, y] = local(e); pointer.x = x; pointer.y = y; pointer.in = true; canvas.style.cursor = hit(x, y) >= 0 ? "pointer" : "default"; };
   const onLeave = () => (pointer.in = false);
@@ -266,27 +276,27 @@ function createEngine(canvas, reduce) {
   }
 
   async function workStep(k, fact, onStep) {
-    const from = chain[k], to = chain[k + 1], col = STEP_COLORS[k];
+    const from = chain[k], to = chain[k + 1], col = T.steps[k];
     edges[k].fact = fact; edges[k].mode = "new";
-    nodes[fact].litTarget = 1; nodes[fact].color = "#FFC93C"; bounce(fact, 0.6);
+    nodes[fact].litTarget = 1; nodes[fact].color = T.fact; bounce(fact, 0.6);
     pulses.push({ from, to, t0: performance.now(), dur: reduce ? 1 : 750, color: col });
     edges[k].target = 1; edges[k].rate = 0.05;
     await sleep(reduce ? 120 : 780);
     nodes[to].litTarget = 1; nodes[to].color = col;
     bounce(to, 1); burst(to, col, 12);
-    sticker(to, "+1 saved", col === "#22D3A6" ? "#22D3A6" : col);
+    sticker(to, "+1 saved", col);
     onStep?.(k, "worked");
     await sleep(reduce ? 60 : 260);
   }
 
   async function reuseStep(k, onStep) {
-    const to = chain[k + 1], col = STEP_COLORS[k];
+    const to = chain[k + 1], col = T.steps[k];
     edges[k].fact = stepFact[k]; edges[k].mode = "reused";
     nodes[stepFact[k]].litTarget = 1;
     edges[k].target = 1; edges[k].rate = 0.35;
     nodes[to].litTarget = 1; nodes[to].color = col;
-    bounce(to, 1.2); burst(to, "#22D3A6", 8);
-    sticker(to, "reused", "#22D3A6");
+    bounce(to, 1.2); burst(to, T.reuse, 8);
+    sticker(to, "reused", T.reuse);
     onStep?.(k, "reused");
     await sleep(reduce ? 40 : 150);
   }
@@ -294,24 +304,25 @@ function createEngine(canvas, reduce) {
   return {
     async askFresh(onStep) {
       clearPath(); await sleep(reduce ? 50 : 350);
-      nodes[Q].litTarget = 1; nodes[Q].color = "#3B5BFF"; bounce(Q, 1.2); burst(Q, "#3B5BFF", 10);
+      nodes[Q].litTarget = 1; nodes[Q].color = T.q; bounce(Q, 1.2); burst(Q, T.q, 10);
       await sleep(reduce ? 50 : 300);
       for (let k = 0; k < 4; k++) await workStep(k, stepFact[k], onStep);
       await workStep(4, lastFacts[0], onStep);
-      nodes[A].litTarget = 1; nodes[A].color = "#FF4D8D"; bounce(A, 1.6); burst(A, "#FF4D8D", 18);
+      nodes[A].litTarget = 1; nodes[A].color = T.a; bounce(A, 1.6); burst(A, T.a, 18);
     },
     async askSimilar(variant, onStep) {
       clearPath(); await sleep(reduce ? 50 : 300);
-      nodes[Q].litTarget = 1; bounce(Q, 1.2); burst(Q, "#3B5BFF", 10);
+      nodes[Q].litTarget = 1; bounce(Q, 1.2); burst(Q, T.q, 10);
       await sleep(reduce ? 50 : 250);
       for (let k = 0; k < 4; k++) await reuseStep(k, onStep);
       await sleep(reduce ? 50 : 200);
       await workStep(4, lastFacts[1 + (variant % 3)], onStep);
-      nodes[A].litTarget = 1; bounce(A, 1.8); burst(A, "#FF4D8D", 22);
+      nodes[A].litTarget = 1; bounce(A, 1.8); burst(A, T.a, 22);
     },
     reset() { clearPath(false); nodes.forEach((n, i) => i < 30 && bounce(i, 0.3)); },
     destroy() {
       alive = false; cancelAnimationFrame(raf); ro.disconnect();
+      themeQuery.removeEventListener?.("change", onTheme);
       canvas.removeEventListener("pointerdown", onDown);
       canvas.removeEventListener("pointermove", onMove);
       canvas.removeEventListener("pointerleave", onLeave);
@@ -320,7 +331,8 @@ function createEngine(canvas, reduce) {
 }
 
 // ---------------------------------------------------------------------------
-// React wrapper: controls, cost meter, Hops narrating.
+// React wrapper: the "Interactive Benchmark Monitor" frame, telemetry and
+// controls. The story sequence below is the same as before.
 // ---------------------------------------------------------------------------
 export default function Playground() {
   const canvasRef = useRef(null);
@@ -328,10 +340,10 @@ export default function Playground() {
   const userTook = useRef(false);
   const [busy, setBusy] = useState(false);
   const [saved, setSaved] = useState(0);
+  const [runs, setRuns] = useState(0);
   const [steps, setSteps] = useState([null, null, null, null, null]); // "worked" | "reused" | null
-  const [question, setQuestion] = useState("Tap a button to ask Hops a question.");
-  const [say, setSay] = useState({ key: "hi", text: "Hi, I'm Hops! Ask me something and watch what I remember." });
-  const [excited, setExcited] = useState(false);
+  const [question, setQuestion] = useState("awaiting input");
+  const [log, setLog] = useState({ key: "init", text: "monitor ready. select a query to begin." });
   const variant = useRef(0);
 
   useEffect(() => {
@@ -343,38 +355,38 @@ export default function Playground() {
   const onStep = useCallback((k, kind) => {
     setSteps((s) => { const n = [...s]; n[k] = kind; return n; });
     if (kind === "worked") setSaved((v) => Math.min(v + 1, 8));
+    setLog({ key: `s${k}${kind}${Math.random()}`, text: kind === "worked" ? `step ${k + 1}/5 derived, verified and stored` : `step ${k + 1}/5 retrieved from memory` });
   }, []);
 
   const fresh = useCallback(async () => {
     if (!engine.current) return;
-    setBusy(true); setSteps([null, null, null, null, null]); setSaved(0); setExcited(false);
+    setBusy(true); setSteps([null, null, null, null, null]); setSaved(0); setRuns((r) => r + 1);
     setQuestion(QUESTIONS.fresh);
-    setSay({ key: "think", text: "A brand-new question! I'll work it out step by step and check each one." });
+    setLog({ key: "fresh", text: "new query: no stored steps apply. deriving from scratch…" });
     await engine.current.askFresh(onStep);
-    setSay({ key: "saved", text: "Done! Every step held up, so I saved all five for next time." });
+    setLog({ key: "fresh-done", text: "complete: 5 derived, 0 reused. all steps verified and stored." });
     setBusy(false);
   }, [onStep]);
 
   const similar = useCallback(async () => {
     if (!engine.current) return;
-    setBusy(true); setSteps([null, null, null, null, null]); setExcited(true);
+    setBusy(true); setSteps([null, null, null, null, null]); setRuns((r) => r + 1);
     const v = variant.current++;
     setQuestion(QUESTIONS.similar[v % 3]);
-    setSay({ key: "reuse" + v, text: "Ooh, I've seen steps like these! Reusing what I saved…" });
+    setLog({ key: "sim" + v, text: "related query: matching stored steps found. reusing…" });
     await engine.current.askSimilar(v, onStep);
-    setSay({ key: "reused" + v, text: "Answered with 4 steps reused and just 1 new one. Way less thinking!" });
-    setTimeout(() => setExcited(false), 1600);
+    setLog({ key: "sim-done" + v, text: "complete: 1 derived, 4 reused." });
     setBusy(false);
   }, [onStep]);
 
   const clear = useCallback(() => {
     engine.current?.reset();
-    setSaved(0); setSteps([null, null, null, null, null]); setExcited(false);
-    setQuestion("Memory cleared.");
-    setSay({ key: "clear" + Math.random(), text: "Memory wiped! The next question starts from scratch." });
+    setSaved(0); setSteps([null, null, null, null, null]);
+    setQuestion("memory cleared");
+    setLog({ key: "clear" + Math.random(), text: "memory cleared. next query starts from scratch." });
   }, []);
 
-  // Autoplay the story until the visitor presses a button.
+  // Autoplay the sequence until the visitor takes control.
   useEffect(() => {
     let stop = false;
     (async () => {
@@ -393,102 +405,100 @@ export default function Playground() {
   const take = (fn) => () => { userTook.current = true; if (!busy) fn(); };
   const worked = steps.filter((s) => s === "worked").length;
   const reused = steps.filter((s) => s === "reused").length;
+  const pad = (n, w = 3) => String(n).padStart(w, "0");
 
   return (
-    <div className="relative">
-      <div className="card-pop overflow-hidden bg-gradient-to-br from-white via-white to-[#EEF1FF]">
-        {/* top bar */}
-        <div className="flex flex-wrap items-center justify-between gap-2 border-b-3 border-ink bg-sun px-4 py-2.5">
-          <div className="flex items-center gap-2">
-            <span className="flex gap-1.5" aria-hidden>
-              <span className="h-3 w-3 rounded-full border-2 border-ink bg-pink" />
-              <span className="h-3 w-3 rounded-full border-2 border-ink bg-white" />
-              <span className="h-3 w-3 rounded-full border-2 border-ink bg-mint" />
-            </span>
-            <span className="font-mono text-xs font-bold uppercase tracking-wider">Reasoning playground</span>
-          </div>
-          <m.span
-            key={saved}
-            initial={{ scale: 1.25 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 500, damping: 12 }}
-            className="rounded-full border-2 border-ink bg-white px-2.5 py-0.5 font-mono text-xs font-bold"
-          >
-            🧠 {saved} saved {saved === 1 ? "step" : "steps"}
-          </m.span>
+    <figure className="monitor relative">
+      {/* corner registration marks */}
+      {["-left-1.5 -top-1.5 border-l border-t", "-right-1.5 -top-1.5 border-r border-t", "-left-1.5 -bottom-1.5 border-l border-b", "-right-1.5 -bottom-1.5 border-r border-b"].map((c) => (
+        <span key={c} aria-hidden className={`absolute h-3 w-3 border-indigo-500/70 ${c}`} />
+      ))}
+      <div className="border border-slate-300 bg-[var(--c-surface)] dark:border-slate-700">
+        {/* title bar */}
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 px-4 py-2 font-mono text-[11px] uppercase tracking-[0.12em] text-slate-500 dark:border-slate-800 dark:text-slate-400">
+          <span className="flex items-center gap-2 text-slate-800 dark:text-slate-200">
+            <span className={`h-1.5 w-1.5 rounded-full ${busy ? "bg-indigo-500 animate-pulse" : "bg-emerald-500"}`} aria-hidden />
+            Interactive benchmark monitor
+          </span>
+          <span className="tabular-nums">run {pad(runs)} · {busy ? "running" : "idle"}</span>
         </div>
 
-        {/* question chip */}
-        <div className="px-4 pt-3">
+        {/* query line */}
+        <div className="flex items-center gap-3 border-b border-slate-200 px-4 py-2 font-mono text-xs dark:border-slate-800">
+          <span className="text-indigo-600 dark:text-indigo-400">query&gt;</span>
           <AnimatePresence mode="wait">
-            <m.p
-              key={question}
-              initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 12 }}
-              className="inline-flex max-w-full items-center gap-2 rounded-xl border-2 border-ink bg-sky px-3 py-1 text-sm font-bold text-white"
-            >
-              <span className="font-mono">Q</span> <span className="truncate">{question}</span>
-            </m.p>
+            <m.span key={question} className="truncate text-slate-700 dark:text-slate-300" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
+              {question}
+            </m.span>
           </AnimatePresence>
         </div>
 
-        {/* canvas */}
-        <canvas
-          ref={canvasRef}
-          className="block w-full aspect-[4/3] sm:aspect-[16/11] touch-manipulation"
-          role="img"
-          aria-label="Interactive diagram. A question node connects through five reasoning steps to an answer. New questions build each step slowly and save it; similar questions reuse the saved steps almost instantly. Tap any node to make it bounce."
-        />
-
-        {/* meter + controls */}
-        <div className="border-t-3 border-ink bg-white px-4 pt-3 pb-9 space-y-3">
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-            <span className="font-mono text-xs font-bold uppercase tracking-wider text-ink/70">This answer</span>
-            <div className="flex gap-1.5" aria-hidden>
-              {steps.map((s, i) => (
-                <m.span
-                  key={i + String(s)}
-                  initial={s ? { scale: 0.4, rotate: -20 } : false}
-                  animate={{ scale: 1, rotate: 0 }}
-                  transition={{ type: "spring", stiffness: 500, damping: 14 }}
-                  className={`grid h-7 w-7 place-items-center rounded-lg border-2 border-ink text-xs font-bold ${s === "worked" ? "bg-tang" : s === "reused" ? "bg-mint" : "bg-paper"}`}
-                >
-                  {s === "worked" ? "✎" : s === "reused" ? "♻" : ""}
-                </m.span>
-              ))}
-            </div>
-            <span className="text-sm font-semibold" aria-live="polite">
-              <span className="text-tang font-extrabold">{worked}</span> worked out · <span className="text-[#0f9e7a] font-extrabold">{reused}</span> reused
-            </span>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <ControlButton tone="bg-sky text-white" onClick={take(fresh)} disabled={busy}>✨ New question</ControlButton>
-            <ControlButton tone="bg-mint" onClick={take(similar)} disabled={busy || saved === 0}>♻ Similar question</ControlButton>
-            <ControlButton tone="bg-white" onClick={take(clear)} disabled={busy}>Clear memory</ControlButton>
+        {/* plot area with axis ticks */}
+        <div className="relative">
+          <canvas
+            ref={canvasRef}
+            className="block w-full aspect-[4/3] sm:aspect-[16/10] touch-manipulation"
+            role="img"
+            aria-label="Interactive diagram. A query node connects through five reasoning steps to an answer node. A new query derives each step and stores it; a related query reuses the stored steps almost instantly. Click any node to perturb it."
+          />
+          <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 flex justify-between px-1 font-mono text-[9px] text-slate-400 dark:text-slate-600">
+            {Array.from({ length: 11 }, (_, i) => <span key={i}>{(i / 10).toFixed(1)}</span>)}
           </div>
         </div>
-      </div>
 
-      {/* Hops narrating, peeking over the card's bottom edge */}
-      <div className="relative z-10 -mt-7 ml-1 flex items-end gap-1 pr-1">
-        <div className="shrink-0"><Hops size={88} excited={excited} wave={!busy} /></div>
-        <Bubble side="left" animateKey={say.key} className="mb-7 flex-1 max-w-sm">
-          <p className="text-sm font-bold leading-snug">{say.text}</p>
-        </Bubble>
-      </div>
-    </div>
-  );
-}
+        {/* telemetry */}
+        <div className="grid grid-cols-3 border-t border-slate-200 font-mono dark:border-slate-800">
+          {[
+            ["derived", worked, "text-amber-600 dark:text-amber-400"],
+            ["reused", reused, "text-emerald-600 dark:text-emerald-400"],
+            ["in memory", saved, "text-indigo-600 dark:text-indigo-400"],
+          ].map(([label, v, tone], i) => (
+            <div key={label} className={`px-4 py-2.5 ${i ? "border-l border-slate-200 dark:border-slate-800" : ""}`}>
+              <div className="text-[10px] uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">{label}</div>
+              <div className={`text-xl tabular-nums ${tone}`}>{pad(v, 2)}</div>
+            </div>
+          ))}
+        </div>
 
-function ControlButton({ children, onClick, disabled, tone }) {
-  return (
-    <m.button
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
-      className={`rounded-xl border-3 border-ink px-3.5 py-2 text-sm font-extrabold shadow-popsm disabled:opacity-45 disabled:cursor-not-allowed ${tone}`}
-      whileHover={disabled ? {} : { y: -2, boxShadow: "5px 5px 0 0 #16133A" }}
-      whileTap={disabled ? {} : { y: 2, x: 2, boxShadow: "0px 0px 0 0 #16133A", scale: 0.97 }}
-      transition={{ type: "spring", stiffness: 500, damping: 18 }}
-    >
-      {children}
-    </m.button>
+        {/* step trace */}
+        <div className="flex items-center gap-3 border-t border-slate-200 px-4 py-2.5 dark:border-slate-800">
+          <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">trace</span>
+          <div className="flex flex-1 gap-1" aria-hidden>
+            {steps.map((s, i) => (
+              <m.span
+                key={i + String(s)}
+                className={`h-1.5 flex-1 ${s === "worked" ? "bg-amber-500" : s === "reused" ? "bg-emerald-500" : "bg-slate-200 dark:bg-slate-800"}`}
+                initial={s ? { scaleX: 0 } : false}
+                animate={{ scaleX: 1 }}
+                style={{ originX: 0 }}
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              />
+            ))}
+          </div>
+          <span className="font-mono text-[10px] text-slate-500 tabular-nums dark:text-slate-400" aria-live="polite">{worked}d / {reused}r</span>
+        </div>
+
+        {/* controls */}
+        <div className="flex flex-wrap gap-2 border-t border-slate-200 px-4 py-3 dark:border-slate-800">
+          <ToolButton primary onClick={take(fresh)} disabled={busy}>Run new query</ToolButton>
+          <ToolButton onClick={take(similar)} disabled={busy || saved === 0}>Run related query</ToolButton>
+          <ToolButton onClick={take(clear)} disabled={busy}>Clear memory</ToolButton>
+        </div>
+
+        {/* console */}
+        <div className="flex items-center gap-2 border-t border-slate-200 bg-slate-50 px-4 py-2 font-mono text-[11px] text-slate-600 dark:border-slate-800 dark:bg-slate-900/60 dark:text-slate-400">
+          <span className="text-slate-400 dark:text-slate-600">$</span>
+          <AnimatePresence mode="wait">
+            <m.span key={log.key} className="truncate" initial={{ opacity: 0, y: 3 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.18 }}>
+              {log.text}
+            </m.span>
+          </AnimatePresence>
+          <span className="ml-0.5 inline-block h-3 w-1.5 animate-pulse bg-slate-400 dark:bg-slate-500" aria-hidden />
+        </div>
+      </div>
+      <figcaption className="mt-3 font-mono text-[11px] text-slate-500 dark:text-slate-400">
+        <span className="text-slate-800 dark:text-slate-200">Fig. 1.</span> Illustrative simulation: step counts are for demonstration, not measured results. Click nodes to perturb them.
+      </figcaption>
+    </figure>
   );
 }

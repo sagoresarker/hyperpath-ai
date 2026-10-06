@@ -1,189 +1,191 @@
 import { m } from "framer-motion";
 import Layout from "../components/Layout.jsx";
 import Playground from "../components/Playground.jsx";
-import { Hops, Vee, Lemma, Bubble } from "../components/Mascots.jsx";
-import { Badge, PopButton, Reveal, CountUp } from "../components/ui.jsx";
+import { ToolButton, SectionHead, Reveal, CountUp } from "../components/ui.jsx";
 
-const springy = { type: "spring", stiffness: 260, damping: 14 };
+const ease = [0.2, 0.7, 0.2, 1];
+const SOURCE = "https://www.techtimes.com/articles/323879/20260811/gartner-marks-first-year-inference-spending-beats-ai-training-55-cents-every-cloud-dollar.htm";
 
 function Hero() {
   return (
-    <section className="mx-auto max-w-6xl pt-10 pb-24 md:pt-16 grid gap-14 lg:grid-cols-[1fr_1.05fr] items-center">
-      <div className="space-y-7">
-        <m.div className="flex flex-wrap gap-2" initial="hidden" animate="show" variants={{ show: { transition: { staggerChildren: 0.08 } } }}>
-          {[
-            ["Research-led", "sun", "🔬"],
-            ["Verified reuse", "pink", "✅"],
-            ["Edge-ready", "mint", "⚡"],
-          ].map(([t, tone, icon]) => (
-            <m.span key={t} variants={{ hidden: { opacity: 0, y: 12, scale: 0.8 }, show: { opacity: 1, y: 0, scale: 1, transition: springy } }}>
-              <Badge tone={tone} icon={icon}>{t}</Badge>
-            </m.span>
-          ))}
+    <section className="relative grid grid-cols-12 gap-x-6 pb-24 pt-8 lg:pt-6">
+      {/* left ruler */}
+      <div aria-hidden className="absolute -left-1 top-6 hidden h-[520px] w-3 flex-col justify-between lg:flex">
+        {Array.from({ length: 14 }, (_, i) => (
+          <span key={i} className={`block h-px bg-slate-300 dark:bg-slate-700 ${i % 5 === 0 ? "w-3" : "w-1.5"}`} />
+        ))}
+      </div>
+
+      <div className="relative z-10 col-span-12 lg:col-span-7 lg:col-start-1 lg:row-start-1 lg:pl-8">
+        <m.div className="flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-[11px] uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400"
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6 }}>
+          <span className="text-indigo-600 dark:text-indigo-400">Working paper HP-001</span>
+          <span>Reasoning infrastructure</span>
+          <span>Rev. 2026.10</span>
         </m.div>
 
         <m.h1
-          className="text-[clamp(2.7rem,7vw,5.4rem)] font-extrabold leading-[0.95]"
-          initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ ...springy, delay: 0.1 }}
+          className="mt-5 text-[clamp(2.9rem,7.4vw,6.4rem)] leading-[0.98] tracking-[-0.025em] lg:pr-6"
+          initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease, delay: 0.05 }}
         >
-          AI that gets{" "}
-          <m.span className="marker" style={{ "--marker": "#FF4D8D80" }} whileHover={{ rotate: -3, scale: 1.05 }}>cheaper</m.span>
-          <br className="hidden sm:block" /> the more it{" "}
-          <m.span className="marker" whileHover={{ rotate: 3, scale: 1.05 }}>thinks.</m.span>
+          AI that gets <em className="font-normal text-indigo-600 dark:text-indigo-400">cheaper</em>
+          <br className="hidden sm:block" /> the more it thinks.
         </m.h1>
 
-        <m.p
-          className="max-w-xl text-lg md:text-xl text-ink/80 font-semibold"
-          initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ ...springy, delay: 0.2 }}
-        >
-          Today, every AI answer is reasoned from scratch and then thrown away. Hyperpath AI is building infrastructure that
-          saves reasoning, checks it and uses it again, so each answer costs less than the one before.
-        </m.p>
-
-        <m.div className="flex flex-wrap gap-3" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ ...springy, delay: 0.3 }}>
-          <PopButton href="contact.html" tone="sun">Talk to us →</PopButton>
-          <PopButton href="#how" tone="white">How it works</PopButton>
+        <m.div className="mt-8 grid max-w-xl gap-6 sm:grid-cols-[6.5rem_1fr]"
+          initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease, delay: 0.15 }}>
+          <span className="label pt-1">Abstract</span>
+          <p className="text-[1.06rem] leading-relaxed text-slate-700 dark:text-slate-300">
+            Today, every AI answer is reasoned from scratch and then discarded. Hyperpath AI is building infrastructure that
+            stores reasoning, verifies it and uses it again, so the marginal cost of each answer falls as a system is used.
+          </p>
         </m.div>
-        <p className="font-mono text-xs font-bold text-ink/60">👉 Try the playground: tap the nodes, then ask Hops a question.</p>
+
+        <m.div className="mt-8 flex flex-wrap gap-3 sm:pl-[7.5rem]"
+          initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease, delay: 0.25 }}>
+          <ToolButton primary href="contact.html">Request a briefing</ToolButton>
+          <ToolButton href="#method">Read the overview</ToolButton>
+        </m.div>
+
+        <m.dl className="mt-10 grid max-w-md grid-cols-3 border-y border-slate-200 font-mono text-[11px] dark:border-slate-800 sm:ml-[7.5rem]"
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.8, delay: 0.35 }}>
+          {[["Field", "Inference efficiency"], ["Principle", "Verify, then reuse"], ["Deploy", "Cloud · edge"]].map(([k, v], i) => (
+            <div key={k} className={`py-3 ${i ? "border-l border-slate-200 pl-4 dark:border-slate-800" : ""}`}>
+              <dt className="uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">{k}</dt>
+              <dd className="mt-1 text-slate-800 dark:text-slate-200">{v}</dd>
+            </div>
+          ))}
+        </m.dl>
       </div>
 
-      <m.div initial={{ opacity: 0, scale: 0.92, rotate: 2 }} animate={{ opacity: 1, scale: 1, rotate: 0 }} transition={{ ...springy, delay: 0.25 }} className="lg:pl-6">
+      <m.div
+        className="relative z-0 col-span-12 mt-14 lg:col-span-6 lg:col-start-7 lg:row-start-1 lg:mt-64"
+        initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.9, ease, delay: 0.2 }}
+      >
         <Playground />
       </m.div>
     </section>
   );
 }
 
-function Crew() {
-  const crew = [
-    {
-      n: "1", name: "Hops", role: "Thinks it through", Mascot: Hops, tone: "bg-sky", bubble: "white",
-      text: "When a new question arrives, I work it out one step at a time, just like AI does today.",
-    },
-    {
-      n: "2", name: "Vee", role: "Checks every step", Mascot: Vee, tone: "bg-mint", bubble: "white",
-      text: "Before anything is kept, I check it. Only steps that hold up get saved. No shortcuts on correctness.",
-    },
-    {
-      n: "3", name: "Lemma", role: "Reuses what's proven", Mascot: Lemma, tone: "bg-sun", bubble: "white",
-      text: "Next time a similar question shows up, I hand over the saved steps. Less thinking, faster answers, lower cost.",
-    },
-  ];
+function Problem() {
   return (
-    <section id="how" className="mx-auto max-w-6xl py-20 scroll-mt-24">
-      <Reveal className="mb-12 max-w-2xl space-y-3">
-        <span className="eyebrow text-pink">How it works</span>
-        <h2 className="text-4xl md:text-6xl font-extrabold">Meet the crew.</h2>
-        <p className="text-lg font-semibold text-ink/75">Three friendly helpers explain the big idea: reasoning that is worked out once, checked, and then reused.</p>
+    <section className="grid gap-10 py-16 lg:grid-cols-12">
+      <SectionHead no="1" label="Problem" className="lg:col-span-12" />
+      <Reveal className="lg:col-span-6">
+        <h2 className="text-3xl leading-[1.12] md:text-[2.6rem]">AI pays for the same thinking again and again.</h2>
+        <p className="mt-5 max-w-xl leading-relaxed text-slate-700 dark:text-slate-300">
+          When many people ask related questions, a model works through many of the same intermediate steps for each of them.
+          The work is computed, billed and discarded. As models reason longer before they answer, that repeated cost grows.
+        </p>
       </Reveal>
-      <div className="grid gap-8 md:grid-cols-3">
-        {crew.map((c, i) => (
-          <Reveal key={c.name} delay={i * 0.12}>
-            <m.article
-              className="card-pop h-full p-6 flex flex-col gap-5"
-              whileHover={{ y: -8, rotate: i === 1 ? 0 : i === 0 ? -1.5 : 1.5, boxShadow: "10px 12px 0 0 #16133A" }}
-              transition={{ type: "spring", stiffness: 300, damping: 16 }}
-            >
-              <div className="flex items-center justify-between">
-                <span className={`grid h-12 w-12 place-items-center rounded-2xl border-3 border-ink font-display text-2xl font-extrabold ${c.tone} ${c.tone === "bg-sky" ? "text-white" : ""}`}>{c.n}</span>
-                <Badge tone="white">{c.role}</Badge>
-              </div>
-              <div className="flex items-end gap-2">
-                <c.Mascot size={92} />
-                <Bubble side="left" className="flex-1 mb-10" tone={c.bubble}>
-                  <p className="text-sm font-bold leading-snug">{c.text}</p>
-                </Bubble>
-              </div>
-              <h3 className="text-2xl font-extrabold">{c.name}</h3>
-            </m.article>
-          </Reveal>
-        ))}
-      </div>
+      <Reveal delay={0.1} className="lg:col-span-5 lg:col-start-8">
+        <div className="panel relative p-7">
+          <span className="label">Inference share of AI cloud spend, 2026</span>
+          <div className="mt-3 flex items-baseline gap-1">
+            <CountUp to={55} suffix="%" className="font-serif text-7xl tabular-nums tracking-tight md:text-8xl" />
+            <a href="#ref-1" className="cite">[1]</a>
+          </div>
+          <div className="mt-5 h-2 w-full bg-slate-100 dark:bg-slate-800" aria-hidden>
+            <m.div className="h-full bg-indigo-500" initial={{ width: 0 }} whileInView={{ width: "55%" }} viewport={{ once: true }} transition={{ duration: 1.4, ease }} />
+          </div>
+          <div className="mt-2 flex justify-between font-mono text-[10px] uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">
+            <span>Running models</span><span>Training</span>
+          </div>
+          <p className="mt-5 text-sm leading-relaxed text-slate-600 dark:text-slate-400">The first year in which spending on running models exceeded spending on training them.</p>
+        </div>
+      </Reveal>
     </section>
   );
 }
 
-function Problem() {
+function Method() {
+  const stages = [
+    { no: "01", name: "Derive", text: "A new question is worked through step by step, as AI systems do today." },
+    { no: "02", name: "Verify", text: "Each step is checked before anything is kept. Only steps that hold up are stored." },
+    { no: "03", name: "Reuse", text: "When a related question arrives, stored steps are supplied instead of recomputed. Less computation, faster answers." },
+  ];
   return (
-    <section className="py-6">
-      <div className="mx-auto max-w-6xl rounded-[2rem] border-3 border-ink bg-ink text-white shadow-poplg overflow-hidden relative">
-        <m.div
-          aria-hidden className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-pink/40 blur-3xl"
-          animate={{ scale: [1, 1.2, 1], opacity: [0.6, 0.9, 0.6] }} transition={{ duration: 6, repeat: Infinity }}
-        />
-        <m.div
-          aria-hidden className="absolute -left-20 -bottom-28 h-72 w-72 rounded-full bg-sky/50 blur-3xl"
-          animate={{ scale: [1.1, 0.9, 1.1] }} transition={{ duration: 7, repeat: Infinity }}
-        />
-        <div className="relative grid gap-10 p-8 md:p-14 md:grid-cols-[1.2fr_1fr] items-center">
-          <Reveal className="space-y-5">
-            <span className="eyebrow text-sun">The problem</span>
-            <h2 className="text-4xl md:text-5xl font-extrabold">AI pays for the same thinking again and again.</h2>
-            <p className="text-lg text-white/80 font-semibold max-w-xl">
-              When thousands of people ask related questions, a model works through many of the same steps for each of them.
-              The work is done, billed and thrown away. As models think harder before answering, that repeated cost keeps growing.
-            </p>
-          </Reveal>
-          <Reveal delay={0.15} className="flex justify-center">
-            <m.div
-              className="relative w-full max-w-xs rotate-[-4deg] rounded-[1.75rem] border-3 border-white bg-sun p-7 text-ink shadow-[8px_8px_0_0_#FF4D8D]"
-              whileHover={{ rotate: 0, scale: 1.04 }} transition={{ type: "spring", stiffness: 300, damping: 12 }}
-            >
-              <span className="absolute -top-4 -right-4 rotate-12 rounded-full border-3 border-ink bg-pink px-3 py-1 font-mono text-xs font-bold text-white">2026</span>
-              <CountUp to={55} suffix="%" className="block font-display text-7xl md:text-8xl font-extrabold leading-none" />
-              <p className="mt-3 font-bold">of AI cloud spending went to running models, not training them: the first year inference came out ahead.</p>
-              <p className="mt-3 text-xs font-semibold text-ink/70">
-                Source: Gartner, reported by{" "}
-                <a className="underline" href="https://www.techtimes.com/articles/323879/20260811/gartner-marks-first-year-inference-spending-beats-ai-training-55-cents-every-cloud-dollar.htm">TechTimes</a>, August 2026.
-              </p>
-            </m.div>
-          </Reveal>
+    <section id="method" className="scroll-mt-28 py-16">
+      <SectionHead no="2" label="Method overview" title="Work it out once. Check it. Use it again." />
+      <Reveal delay={0.05} className="mt-10">
+        <div className="panel">
+          {/* pipeline schematic */}
+          <svg viewBox="0 0 900 120" className="block w-full border-b border-slate-200 text-slate-400 dark:border-slate-800 dark:text-slate-600" role="img" aria-label="Pipeline: derive, then verify, then reuse, with reuse feeding later queries.">
+            <defs>
+              <marker id="arr" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" orient="auto">
+                <path d="M0 0 L8 4 L0 8 Z" fill="currentColor" />
+              </marker>
+            </defs>
+            {[0, 1, 2].map((i) => (
+              <g key={i}>
+                <rect x={40 + i * 300} y="30" width="220" height="50" fill="none" stroke="currentColor" strokeWidth="1" />
+                <text x={150 + i * 300} y="60" textAnchor="middle" className="fill-slate-800 dark:fill-slate-200" style={{ font: '500 13px "IBM Plex Mono", monospace', letterSpacing: "0.12em" }}>
+                  {stages[i].no} {stages[i].name.toUpperCase()}
+                </text>
+              </g>
+            ))}
+            <m.path d="M260 55 H340" stroke="currentColor" strokeWidth="1" fill="none" markerEnd="url(#arr)" initial={{ pathLength: 0 }} whileInView={{ pathLength: 1 }} viewport={{ once: true }} transition={{ duration: 0.7, delay: 0.2 }} />
+            <m.path d="M560 55 H640" stroke="currentColor" strokeWidth="1" fill="none" markerEnd="url(#arr)" initial={{ pathLength: 0 }} whileInView={{ pathLength: 1 }} viewport={{ once: true }} transition={{ duration: 0.7, delay: 0.6 }} />
+            <m.path d="M750 80 V102 H150 V84" stroke="#6366F1" strokeWidth="1" strokeDasharray="4 4" fill="none" markerEnd="url(#arr)" initial={{ pathLength: 0 }} whileInView={{ pathLength: 1 }} viewport={{ once: true }} transition={{ duration: 1.2, delay: 1 }} style={{ color: "#6366F1" }} />
+            <text x="450" y="116" textAnchor="middle" fill="#6366F1" style={{ font: '500 10px "IBM Plex Mono", monospace', letterSpacing: "0.14em" }}>STORED STEPS FEED LATER QUERIES</text>
+          </svg>
+          <div className="grid md:grid-cols-3">
+            {stages.map((s, i) => (
+              <div key={s.no} className={`p-6 ${i ? "border-t border-slate-200 md:border-l md:border-t-0 dark:border-slate-800" : ""}`}>
+                <div className="font-mono text-xs text-indigo-600 dark:text-indigo-400">{s.no}</div>
+                <h3 className="mt-2 text-2xl">{s.name}</h3>
+                <p className="mt-2 leading-relaxed text-slate-600 dark:text-slate-400">{s.text}</p>
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      </Reveal>
     </section>
   );
 }
 
 function Vision() {
-  const today = [100, 100, 100, 100, 100, 100, 100, 100];
-  const reuse = [100, 80, 64, 52, 43, 37, 33, 30];
+  // Illustrative series: relative cost per answer over successive queries.
+  const reuse = [1, 0.8, 0.64, 0.52, 0.43, 0.37, 0.33, 0.3];
+  const W = 560, H = 240, L = 44, B = 28, T = 16, R = 12;
+  const x = (i) => L + (i / (reuse.length - 1)) * (W - L - R);
+  const y = (v) => T + (1 - v / 1.1) * (H - T - B);
+  const path = reuse.map((v, i) => `${i ? "L" : "M"}${x(i).toFixed(1)} ${y(v).toFixed(1)}`).join(" ");
   return (
-    <section className="mx-auto max-w-6xl py-24 grid gap-12 lg:grid-cols-2 items-center">
-      <Reveal className="space-y-5">
-        <span className="eyebrow text-grape">Our vision</span>
-        <h2 className="text-4xl md:text-6xl font-extrabold">Reasoning should be an <span className="marker" style={{ "--marker": "#22D3A680" }}>asset</span>, not a recurring bill.</h2>
-        <p className="text-lg font-semibold text-ink/75 max-w-xl">
-          Rockets became affordable when they became reusable. We believe the same shift is coming for machine reasoning:
-          work done once should make the next problem easier, faster and cheaper to solve.
+    <section className="grid gap-10 py-16 lg:grid-cols-12">
+      <SectionHead no="3" label="Vision" className="lg:col-span-12" />
+      <Reveal className="lg:col-span-5">
+        <h2 className="text-3xl leading-[1.12] md:text-[2.6rem]">Reasoning should be an asset, not a recurring bill.</h2>
+        <p className="mt-5 leading-relaxed text-slate-700 dark:text-slate-300">
+          Spaceflight became affordable when rockets became reusable. We expect the same shift in machine reasoning: work done
+          once should make the next problem faster and cheaper to solve.
         </p>
       </Reveal>
-      <Reveal delay={0.1}>
-        <div className="card-pop p-6 space-y-6 relative">
-          {[["Today", today, "bg-tang"], ["With reuse", reuse, "bg-mint"]].map(([label, data, color]) => (
-            <div key={label} className="grid grid-cols-[6.5rem_1fr] items-end gap-3">
-              <span className="font-display text-lg font-extrabold">{label}</span>
-              <div className="flex h-24 items-end gap-1.5">
-                {data.map((h, i) => (
-                  <m.span
-                    key={i}
-                    className={`flex-1 rounded-t-lg border-3 border-ink ${color}`}
-                    initial={{ height: "6%" }}
-                    whileInView={{ height: `${h}%` }}
-                    viewport={{ once: true }}
-                    transition={{ type: "spring", stiffness: 120, damping: 12, delay: i * 0.07 }}
-                    whileHover={{ y: -6 }}
-                  />
-                ))}
-              </div>
-            </div>
-          ))}
-          <div className="flex items-end gap-2 pt-2">
-            <Lemma size={78} />
-            <Bubble side="left" className="mb-8 flex-1">
-              <p className="text-sm font-bold">Each bar is the cost of one answer over time. It's an illustration of our goal, not a measured result.</p>
-            </Bubble>
-          </div>
-        </div>
+      <Reveal delay={0.1} className="lg:col-span-6 lg:col-start-7">
+        <figure className="panel p-5">
+          <svg viewBox={`0 0 ${W} ${H}`} className="block w-full" role="img" aria-label="Illustrative chart. Cost per answer stays flat without reuse and falls with reuse.">
+            {[0, 0.25, 0.5, 0.75, 1].map((v) => (
+              <g key={v}>
+                <line x1={L} x2={W - R} y1={y(v)} y2={y(v)} className="stroke-slate-200 dark:stroke-slate-800" strokeWidth="1" />
+                <text x={L - 8} y={y(v) + 3} textAnchor="end" className="fill-slate-500 dark:fill-slate-400" style={{ font: '400 10px "IBM Plex Mono", monospace' }}>{v.toFixed(2)}</text>
+              </g>
+            ))}
+            {reuse.map((_, i) => (
+              <text key={i} x={x(i)} y={H - 10} textAnchor="middle" className="fill-slate-500 dark:fill-slate-400" style={{ font: '400 10px "IBM Plex Mono", monospace' }}>{`q${i + 1}`}</text>
+            ))}
+            <line x1={L} x2={W - R} y1={y(1)} y2={y(1)} stroke="#64748B" strokeWidth="1.5" strokeDasharray="5 4" />
+            <m.path d={path} fill="none" stroke="#6366F1" strokeWidth="2" initial={{ pathLength: 0 }} whileInView={{ pathLength: 1 }} viewport={{ once: true }} transition={{ duration: 1.6, ease }} />
+            {reuse.map((v, i) => (
+              <m.circle key={i} cx={x(i)} cy={y(v)} r="3.5" fill="#6366F1" initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: 0.2 + i * 0.18 }} />
+            ))}
+            <text x={W - R} y={y(1) - 8} textAnchor="end" fill="#64748B" style={{ font: '500 10px "IBM Plex Mono", monospace', letterSpacing: "0.1em" }}>WITHOUT REUSE</text>
+            <text x={x(7)} y={y(0.3) - 12} textAnchor="end" fill="#6366F1" style={{ font: '500 10px "IBM Plex Mono", monospace', letterSpacing: "0.1em" }}>WITH REUSE</text>
+          </svg>
+          <figcaption className="mt-3 font-mono text-[11px] text-slate-500 dark:text-slate-400">
+            <span className="text-slate-800 dark:text-slate-200">Fig. 2.</span> Relative cost per answer across successive related queries. Illustrative of our goal; not a measured result.
+          </figcaption>
+        </figure>
       </Reveal>
     </section>
   );
@@ -191,31 +193,22 @@ function Vision() {
 
 function Commitments() {
   const items = [
-    { tag: "Reusable", icon: "♻", title: "Work done once keeps paying off", text: "Systems that improve with use, so costs fall the longer they run, not rise.", tone: "bg-sun", rot: -2 },
-    { tag: "Trustworthy", icon: "✅", title: "Only what holds up gets reused", text: "Speed is worthless if it spreads mistakes. Checking comes before reuse, and every answer can be traced back.", tone: "bg-mint", rot: 1.5 },
-    { tag: "Everywhere", icon: "⚡", title: "Efficient enough for everyday hardware", text: "Capable reasoning on laptops and edge devices, keeping data private and costs low.", tone: "bg-sky text-white", rot: -1 },
+    { id: "C1", tag: "Reusable", title: "Work done once keeps paying off", text: "Systems that improve with use, so costs fall the longer they run." },
+    { id: "C2", tag: "Trustworthy", title: "Only what holds up is reused", text: "Verification precedes reuse, and every answer can be traced to its sources." },
+    { id: "C3", tag: "Efficient", title: "Built for everyday hardware", text: "Capable reasoning on laptops and edge devices, keeping data private and costs low." },
   ];
   return (
-    <section className="mx-auto max-w-6xl py-16">
-      <Reveal className="mb-10 space-y-3">
-        <span className="eyebrow text-sky">What we stand for</span>
-        <h2 className="text-4xl md:text-6xl font-extrabold">Three commitments.</h2>
-      </Reveal>
-      <div className="grid gap-7 md:grid-cols-3">
+    <section className="py-16">
+      <SectionHead no="4" label="Commitments" title="Three design constraints we hold ourselves to." />
+      <div className="mt-10 grid border-t border-slate-200 md:grid-cols-3 dark:border-slate-800">
         {items.map((it, i) => (
-          <Reveal key={it.tag} delay={i * 0.1}>
-            <m.div
-              className={`h-full rounded-3xl border-3 border-ink p-7 shadow-pop ${it.tone}`}
-              style={{ rotate: it.rot }}
-              whileHover={{ rotate: 0, y: -10, scale: 1.03, boxShadow: "12px 14px 0 0 #16133A" }}
-              whileTap={{ scale: 0.97 }}
-              transition={{ type: "spring", stiffness: 300, damping: 14 }}
-            >
-              <m.span className="mb-5 grid h-14 w-14 place-items-center rounded-2xl border-3 border-ink bg-white text-2xl text-ink" whileHover={{ rotate: 360 }} transition={{ duration: 0.6 }}>{it.icon}</m.span>
-              <span className="eyebrow opacity-80">{it.tag}</span>
-              <h3 className="mt-2 text-2xl font-extrabold">{it.title}</h3>
-              <p className="mt-3 font-semibold opacity-85">{it.text}</p>
-            </m.div>
+          <Reveal key={it.id} delay={i * 0.08} className={`group py-7 md:px-7 ${i ? "border-t border-slate-200 md:border-l md:border-t-0 dark:border-slate-800" : "md:pl-0"}`}>
+            <div className="flex items-baseline justify-between font-mono text-[11px] uppercase tracking-[0.14em]">
+              <span className="text-indigo-600 dark:text-indigo-400">{it.id}</span>
+              <span className="text-slate-500 dark:text-slate-400">{it.tag}</span>
+            </div>
+            <h3 className="mt-4 text-2xl leading-snug transition-colors group-hover:text-indigo-700 dark:group-hover:text-indigo-300">{it.title}</h3>
+            <p className="mt-3 leading-relaxed text-slate-600 dark:text-slate-400">{it.text}</p>
           </Reveal>
         ))}
       </div>
@@ -223,51 +216,78 @@ function Commitments() {
   );
 }
 
-function Audience() {
-  const who = [
-    { icon: "🤖", title: "Companies scaling AI assistants and agents", text: "Where usage grows faster than the budget for it.", tone: "bg-pink text-white" },
-    { icon: "📋", title: "Rule-heavy operations", text: "Claims, eligibility, compliance and support, where similar cases repeat every day.", tone: "bg-grape text-white" },
-    { icon: "🔒", title: "Privacy-sensitive and on-device products", text: "Where sending everything to a large cloud model is not an option.", tone: "bg-tang" },
+function Applications() {
+  const rows = [
+    ["A1", "AI assistants and agents at scale", "Usage grows faster than the budget for it."],
+    ["A2", "Rule-heavy operations", "Claims, eligibility, compliance and support, where similar cases recur daily."],
+    ["A3", "Privacy-sensitive and on-device products", "Sending every request to a large cloud model is not an option."],
   ];
   return (
-    <section className="mx-auto max-w-6xl py-16 grid gap-10 lg:grid-cols-[0.8fr_1.2fr]">
-      <Reveal className="space-y-3">
-        <span className="eyebrow text-tang">Who it's for</span>
-        <h2 className="text-4xl md:text-5xl font-extrabold">Teams that make many related decisions.</h2>
+    <section className="py-16">
+      <SectionHead no="5" label="Applications" title="Where repeated reasoning is most expensive." />
+      <Reveal delay={0.05} className="mt-10">
+        <div className="panel overflow-x-auto">
+          <table className="w-full min-w-[560px] text-left">
+            <thead>
+              <tr className="border-b border-slate-200 font-mono text-[11px] uppercase tracking-[0.14em] text-slate-500 dark:border-slate-800 dark:text-slate-400">
+                <th className="w-16 px-5 py-3 font-medium">ID</th>
+                <th className="px-5 py-3 font-medium">Setting</th>
+                <th className="px-5 py-3 font-medium">Why it matters</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map(([id, a, b]) => (
+                <tr key={id} className="border-b border-slate-200 transition-colors last:border-0 hover:bg-indigo-50/60 dark:border-slate-800 dark:hover:bg-indigo-500/5">
+                  <td className="px-5 py-4 font-mono text-xs text-indigo-600 dark:text-indigo-400">{id}</td>
+                  <td className="px-5 py-4 font-serif text-lg">{a}</td>
+                  <td className="px-5 py-4 text-slate-600 dark:text-slate-400">{b}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </Reveal>
-      <div className="space-y-4">
-        {who.map((w, i) => (
-          <Reveal key={w.title} delay={i * 0.08}>
-            <m.div className="card-pop flex items-center gap-5 p-5" whileHover={{ x: 10, boxShadow: "10px 8px 0 0 #16133A" }} transition={{ type: "spring", stiffness: 400, damping: 18 }}>
-              <span className={`grid h-14 w-14 shrink-0 place-items-center rounded-2xl border-3 border-ink text-2xl ${w.tone}`}>{w.icon}</span>
-              <div>
-                <h3 className="text-xl font-extrabold">{w.title}</h3>
-                <p className="font-semibold text-ink/70">{w.text}</p>
-              </div>
-            </m.div>
-          </Reveal>
-        ))}
-      </div>
     </section>
   );
 }
 
-function CTA() {
+function Correspondence() {
   return (
-    <section className="mx-auto max-w-6xl py-20">
+    <section className="py-16">
       <Reveal>
-        <div className="relative overflow-hidden rounded-[2rem] border-3 border-ink bg-grape p-8 md:p-12 text-white shadow-poplg">
-          <m.div aria-hidden className="absolute inset-0 opacity-30" style={{ backgroundImage: "radial-gradient(#fff 1.5px, transparent 1.5px)", backgroundSize: "24px 24px" }} animate={{ backgroundPositionX: ["0px", "24px"] }} transition={{ duration: 3, repeat: Infinity, ease: "linear" }} />
-          <div className="relative flex flex-col md:flex-row items-center gap-8">
-            <Hops size={130} wave />
-            <div className="flex-1 space-y-3 text-center md:text-left">
-              <h2 className="text-3xl md:text-5xl font-extrabold">We're early, and building in the open where we can.</h2>
-              <p className="text-lg font-semibold text-white/85">Hyperpath AI is a research-led company. We'll share results when they're ready and measured.</p>
-            </div>
-            <PopButton href="contact.html" tone="sun">Get in touch →</PopButton>
+        <div className="panel grid gap-8 p-8 md:grid-cols-[1fr_auto] md:items-end md:p-12">
+          <div>
+            <span className="label">Correspondence</span>
+            <h2 className="mt-3 text-3xl leading-[1.12] md:text-[2.6rem]">We are early, and we publish only what we have measured.</h2>
+            <p className="mt-4 max-w-2xl leading-relaxed text-slate-700 dark:text-slate-300">
+              Hyperpath AI is research-led. We welcome conversations with teams running AI at scale, and with researchers working on reasoning and efficient inference.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <ToolButton primary href="contact.html">Get in touch</ToolButton>
+            <ToolButton href="about.html">About the lab</ToolButton>
           </div>
         </div>
       </Reveal>
+    </section>
+  );
+}
+
+function References() {
+  return (
+    <section className="pb-8 pt-4">
+      <div className="border-t border-slate-200 pt-6 dark:border-slate-800">
+        <span className="label">References</span>
+        <ol className="mt-3 space-y-1 text-sm text-slate-600 dark:text-slate-400">
+          <li id="ref-1" className="flex gap-3 scroll-mt-28">
+            <span className="font-mono text-indigo-600 dark:text-indigo-400">[1]</span>
+            <span>
+              Gartner, reported by TechTimes, “Gartner marks first year inference spending beats AI training,” August 2026.{" "}
+              <a className="underline decoration-slate-300 underline-offset-2 hover:text-indigo-600 dark:decoration-slate-700" href={SOURCE}>Link</a>
+            </span>
+          </li>
+        </ol>
+      </div>
     </section>
   );
 }
@@ -276,12 +296,13 @@ export default function Home() {
   return (
     <Layout current="home">
       <Hero />
-      <Crew />
       <Problem />
+      <Method />
       <Vision />
       <Commitments />
-      <Audience />
-      <CTA />
+      <Applications />
+      <Correspondence />
+      <References />
     </Layout>
   );
 }
