@@ -334,7 +334,9 @@ function createEngine(canvas, reduce) {
 // React wrapper: the "Interactive Benchmark Monitor" frame, telemetry and
 // controls. The story sequence below is the same as before.
 // ---------------------------------------------------------------------------
-export default function Playground() {
+export default function Playground({ onRun, onClear } = {}) {
+  const report = useRef({});
+  report.current = { onRun, onClear };
   const canvasRef = useRef(null);
   const engine = useRef(null);
   const userTook = useRef(false);
@@ -365,6 +367,7 @@ export default function Playground() {
     setLog({ key: "fresh", text: "new query: no stored steps apply. deriving from scratch…" });
     await engine.current.askFresh(onStep);
     setLog({ key: "fresh-done", text: "complete: 5 derived, 0 reused. all steps verified and stored." });
+    report.current.onRun?.({ q: QUESTIONS.fresh, derived: 5, reused: 0 });
     setBusy(false);
   }, [onStep]);
 
@@ -376,6 +379,7 @@ export default function Playground() {
     setLog({ key: "sim" + v, text: "related query: matching stored steps found. reusing…" });
     await engine.current.askSimilar(v, onStep);
     setLog({ key: "sim-done" + v, text: "complete: 1 derived, 4 reused." });
+    report.current.onRun?.({ q: QUESTIONS.similar[v % 3], derived: 1, reused: 4 });
     setBusy(false);
   }, [onStep]);
 
@@ -384,6 +388,7 @@ export default function Playground() {
     setSaved(0); setSteps([null, null, null, null, null]);
     setQuestion("memory cleared");
     setLog({ key: "clear" + Math.random(), text: "memory cleared. next query starts from scratch." });
+    report.current.onClear?.();
   }, []);
 
   // Autoplay the sequence until the visitor takes control.

@@ -1,4 +1,5 @@
-import { m } from "framer-motion";
+import { useCallback, useRef, useState } from "react";
+import { m, AnimatePresence } from "framer-motion";
 import Layout from "../components/Layout.jsx";
 import Playground from "../components/Playground.jsx";
 import { ToolButton, SectionHead, Reveal, CountUp } from "../components/ui.jsx";
@@ -6,52 +7,139 @@ import { ToolButton, SectionHead, Reveal, CountUp } from "../components/ui.jsx";
 const ease = [0.2, 0.7, 0.2, 1];
 const SOURCE = "https://www.techtimes.com/articles/323879/20260811/gartner-marks-first-year-inference-spending-beats-ai-training-55-cents-every-cloud-dollar.htm";
 
-function Hero() {
-  const specs = [
-    ["Field", "Inference efficiency"],
-    ["Principle", "Verify, then reuse"],
-    ["Deploy", "Cloud and edge"],
-    ["Stage", "Early research"],
-  ];
+/** Small falling-cost curve set inline in the headline. */
+function CostGlyph() {
   return (
-    <section className="pb-20 pt-12 lg:pt-16">
-      <div className="grid items-start gap-12 lg:grid-cols-12 lg:gap-10">
-        <div className="lg:col-span-6 lg:pt-6">
-          <m.p className="label" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6 }}>
-            Research overview <span className="mx-2 text-slate-300">/</span> Reasoning infrastructure <span className="mx-2 text-slate-300">/</span> October 2026
-          </m.p>
+    <svg viewBox="0 0 60 30" className="mx-[0.12em] inline-block h-[0.62em] w-[1.25em] -translate-y-[0.06em] align-baseline" aria-hidden>
+      <line x1="2" y1="28" x2="58" y2="28" stroke="#CBD5E1" strokeWidth="2" />
+      <m.path
+        d="M3 4 C 14 6, 18 14, 26 18 S 44 24, 57 25"
+        fill="none" stroke="#4338CA" strokeWidth="4" strokeLinecap="round"
+        initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1.4, ease, delay: 0.6 }}
+      />
+      <m.circle cx="57" cy="25" r="3.6" fill="#4338CA" initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 1.9, type: "spring", stiffness: 400, damping: 14 }} />
+    </svg>
+  );
+}
 
+/** Live ledger fed by the benchmark monitor: one row per completed query. */
+function Ledger({ rows }) {
+  const totalWith = rows.reduce((s, r) => s + r.derived, 0);
+  const totalWithout = rows.length * 5;
+  const saved = totalWithout ? Math.round((1 - totalWith / totalWithout) * 100) : 0;
+  const shown = rows.slice(-4);
+  return (
+    <div className="mt-9 max-w-xl">
+      <div className="flex items-baseline justify-between border-b border-slate-900 pb-2">
+        <span className="font-mono text-[11px] font-medium uppercase tracking-[0.12em] text-slate-900">Cost ledger</span>
+        <span className="font-mono text-[11px] text-slate-500">live · from the monitor<span className="hidden lg:inline"> →</span><span className="lg:hidden"> ↓</span></span>
+      </div>
+      <table className="w-full font-mono text-[12px] tabular-nums">
+        <thead>
+          <tr className="text-left text-[10.5px] uppercase tracking-[0.1em] text-slate-400">
+            <th className="py-2 font-medium">#</th>
+            <th className="py-2 font-medium">Query</th>
+            <th className="py-2 pl-3 text-right font-medium"><span className="sm:hidden">Der.</span><span className="hidden sm:inline">Derived</span></th>
+            <th className="py-2 pl-3 text-right font-medium"><span className="sm:hidden">Reu.</span><span className="hidden sm:inline">Reused</span></th>
+            <th className="py-2 pl-4 font-medium sm:w-[6.5rem]">Cost</th>
+          </tr>
+        </thead>
+        <tbody>
+          {shown.length === 0 && (
+            <tr><td colSpan={5} className="border-t border-slate-200 py-3 text-slate-400">waiting for the first query…</td></tr>
+          )}
+          <AnimatePresence initial={false}>
+            {shown.map((r) => (
+              <m.tr key={r.id} className="border-t border-slate-200 text-slate-700"
+                initial={{ opacity: 0, backgroundColor: "rgba(224,231,255,0.9)" }}
+                animate={{ opacity: 1, backgroundColor: "rgba(224,231,255,0)" }}
+                transition={{ duration: 1.2 }}>
+                <td className="py-2 pr-2 text-slate-400">{String(r.id).padStart(2, "0")}</td>
+                <td className="max-w-[11rem] truncate py-2 pr-2">{r.q}</td>
+                <td className="py-2 text-right text-amber-700">{r.derived}</td>
+                <td className="py-2 text-right text-emerald-700">{r.reused}</td>
+                <td className="py-2 pl-4">
+                  <div className="flex items-center gap-2">
+                    <span className="hidden h-1.5 flex-1 bg-slate-100 sm:block">
+                      <m.span className="block h-full bg-slate-900" initial={{ width: 0 }} animate={{ width: `${(r.derived / 5) * 100}%` }} transition={{ duration: 0.8, ease }} />
+                    </span>
+                    <span className="w-8 text-right">{(r.derived / 5).toFixed(2)}</span>
+                  </div>
+                </td>
+              </m.tr>
+            ))}
+          </AnimatePresence>
+        </tbody>
+      </table>
+      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-t border-slate-900 pt-2 font-mono text-[12px] tabular-nums">
+        <span className="text-slate-500">{rows.length} {rows.length === 1 ? "query" : "queries"} · {totalWith.toFixed(0)} of {totalWithout} steps computed</span>
+        <span className="text-slate-900">
+          <m.span key={saved} initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} className="inline-block font-medium text-indigo-700">{saved}%</m.span> saved vs. no reuse
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function Hero() {
+  const [rows, setRows] = useState([]);
+  const nextId = useRef(1);
+  const onRun = useCallback((r) => setRows((prev) => [...prev, { ...r, id: nextId.current++ }]), []);
+  const onClear = useCallback(() => { setRows([]); nextId.current = 1; }, []);
+
+  return (
+    <section className="pb-20 pt-10 lg:pt-14">
+      {/* journal masthead */}
+      <m.div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-t-[3px] border-slate-900 pt-3"
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6 }}>
+        <span className="border border-slate-900 px-1.5 py-0.5 font-mono text-[11px] font-medium tracking-[0.08em] text-slate-900">NOTE&nbsp;01</span>
+        <span className="font-serif text-[19px] italic leading-none text-slate-800">On reusable reasoning</span>
+        <span className="ml-auto font-mono text-[11px] uppercase tracking-[0.12em] text-slate-500">Hyperpath AI · October 2026</span>
+      </m.div>
+
+      <div className="mt-10 grid items-start gap-12 lg:grid-cols-12 lg:gap-10">
+        <div className="lg:col-span-6">
           <m.h1
-            className="mt-6 text-[clamp(2.75rem,6.2vw,5.25rem)] leading-[1.02] tracking-[-0.035em]"
+            className="text-[clamp(2.6rem,5.6vw,4.75rem)] leading-[1.03] tracking-[-0.04em]"
             initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease, delay: 0.05 }}
           >
-            AI that gets <em className="pr-1 text-[1.08em]">cheaper</em> the more it thinks.
+            AI that gets <em className="pr-0.5 text-[1.08em]">cheaper</em><CostGlyph />
+            <br />
+            the more it thinks.<a href="#note-1" className="cite ml-1 align-super text-[0.32em] tracking-normal">1</a>
           </m.h1>
 
-          <m.div className="mt-8 max-w-xl" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease, delay: 0.15 }}>
-            <p className="label">Abstract</p>
-            <p className="mt-3 text-lg leading-relaxed text-slate-600">
-              Today, every AI answer is reasoned from scratch and then discarded. Hyperpath AI is building infrastructure that
-              stores reasoning, verifies it and uses it again, so the marginal cost of each answer falls as a system is used.
+          <m.div className="mt-8 grid max-w-xl gap-x-6 gap-y-3 sm:grid-cols-[1fr_9.5rem]"
+            initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease, delay: 0.15 }}>
+            <p className="text-[17px] leading-relaxed text-slate-600">
+              Today, every AI answer is reasoned from scratch and then thrown away. We are building infrastructure that keeps
+              reasoning, checks it, and hands it to the next question, so each answer costs less than the one before.
             </p>
+            <aside id="note-1" className="scroll-mt-28 border-l border-slate-300 pl-3 font-serif text-[15px] italic leading-snug text-slate-500">
+              <span className="not-italic font-mono text-[10px] text-indigo-600">1&nbsp;</span>
+              Cost here means reasoning steps computed per answer. The ledger below counts them as the monitor runs.
+            </aside>
           </m.div>
 
-          <m.div className="mt-9 flex flex-wrap gap-3" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease, delay: 0.25 }}>
+          <m.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease, delay: 0.25 }}>
+            <Ledger rows={rows} />
+          </m.div>
+
+          <m.div className="mt-9 flex flex-wrap items-center gap-x-6 gap-y-3" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.8, delay: 0.35 }}>
             <ToolButton primary href="contact.html">Request a briefing</ToolButton>
-            <ToolButton href="#method">Read the overview</ToolButton>
+            <a href="#method" className="group text-[15px] font-medium text-slate-900 underline decoration-slate-300 underline-offset-[6px] transition-colors hover:decoration-slate-900">
+              How it works <span aria-hidden className="inline-block transition-transform group-hover:translate-y-0.5">↓</span>
+            </a>
           </m.div>
         </div>
 
-        <m.div className="lg:col-span-6" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.9, ease, delay: 0.2 }}>
-          <Playground />
+        <m.div className="lg:col-span-6 lg:pt-2" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.9, ease, delay: 0.2 }}>
+          <Playground onRun={onRun} onClear={onClear} />
         </m.div>
       </div>
 
-      <m.dl
-        className="mt-16 grid grid-cols-2 border-y border-slate-200 md:grid-cols-4"
-        initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.8, delay: 0.4 }}
-      >
-        {specs.map(([k, v], i) => (
+      <m.dl className="mt-16 grid grid-cols-2 border-y border-slate-200 md:grid-cols-4"
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.8, delay: 0.4 }}>
+        {[["Field", "Inference efficiency"], ["Principle", "Verify, then reuse"], ["Deploy", "Cloud and edge"], ["Stage", "Early research"]].map(([k, v], i) => (
           <div key={k} className={`px-5 py-4 ${i % 2 ? "border-l border-slate-200" : ""} ${i === 2 ? "border-t border-slate-200 md:border-l md:border-t-0" : ""} ${i === 3 ? "border-t md:border-t-0" : ""}`}>
             <dt className="label">{k}</dt>
             <dd className="mt-1.5 text-[15px] font-medium text-slate-900">{v}</dd>
