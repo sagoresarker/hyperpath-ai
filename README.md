@@ -1,25 +1,36 @@
 # Hyperpath AI website
 
-Public website for Hyperpath AI. Plain HTML and CSS, with no build step.
+Public website for Hyperpath AI: a static, client-side-only site in a playful "tech-cartoon" style.
 
-- `index.html`: Vision (home)
-- `about.html`: About
-- `contact.html`: Contact
-- `404.html`: Not-found page
-- `assets/`: Stylesheet, script and favicon
+- **Stack:** React 18, Tailwind CSS 3 and Framer Motion, built with Vite. All animation runs in the browser (Framer Motion springs, HTML5 Canvas and SVG). There is no server code.
+- **Pages:** Vision (home, with the interactive reasoning playground), About, Contact and 404.
+- **Hosting:** GitHub Pages, deployed from the `main` branch root.
 
-## Publishing
+## Layout
 
-GitHub Pages publishes the site directly from the `main` branch (root folder) on every push.
-Setting: **Settings → Pages → Build and deployment → Source: Deploy from a branch → `main` / `(root)`**.
-The `.nojekyll` file tells GitHub to serve the files as they are, without a Jekyll build.
+| Path | What it is |
+|---|---|
+| `web/` | Source code (edit here) |
+| `web/src/components/Playground.jsx` | Interactive canvas demo: nodes, springs, pulses, stickers |
+| `web/src/components/Mascots.jsx` | Hops, Vee and Lemma (SVG mascots) and the speech bubble |
+| `web/src/components/Background.jsx` | Animated glow and particle background |
+| `index.html`, `about.html`, `contact.html`, `404.html`, `assets/` | **Built output** served by GitHub Pages. Do not edit by hand |
 
-## Editing
+## Develop and publish
 
-- **Contact email:** the contact page currently points to the GitHub repository. To show an email address instead, replace the `REPO` value in the "Reach us" block of `contact.html`.
-- **Team:** the About page describes the team without names. Add people only with their consent.
-- **Custom domain:** add a `CNAME` file containing the domain, then configure DNS as described in GitHub's Pages documentation.
+```bash
+cd web
+npm ci
+npm run dev      # local dev server
+npm run build    # writes the static site into the repository root
+```
 
-## What this site does not include
+Then commit the rebuilt root files together with any source changes and push to `main`. GitHub Pages republishes automatically.
 
-This site describes the vision only. Research methods, results and technical details are deliberately left out.
+For a custom domain, build with `VITE_BASE=/ npm run build` and add a `CNAME` file.
+
+## Notes
+
+- Motion respects the visitor's reduced-motion setting: canvases draw still frames and springs are disabled.
+- The site describes the vision only. Research methods, results and technical details are deliberately left out.
+- The contact page points to this GitHub repository until a contact email is added (`REPO` in `web/src/pages/Contact.jsx`).
