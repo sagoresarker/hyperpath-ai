@@ -3,7 +3,7 @@ import { m } from "framer-motion";
 import Layout from "../components/Layout.jsx";
 import { ToolButton, SectionHead, Reveal } from "../components/ui.jsx";
 
-const REPO = "https://github.com/sagoresarkerbdcse/hyperpath-ai";
+const REPO = "https://github.com/sagoresarker/hyperpath-ai";
 const topics = [
   ["T1", "Design partners", "Teams whose AI costs grow with usage and who want to shape what we build."],
   ["T2", "Research collaboration", "Academic and industry researchers working on reasoning, memory or efficient inference."],
